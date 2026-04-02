@@ -66,6 +66,9 @@ body {
     font-size: 20px;
     cursor: pointer;
     padding-left: 12px;
+    text-decoration: none;
+    color: #111111;
+    display: inline-block;
 }
 
 .sidebar-bottom {
@@ -205,6 +208,7 @@ body {
     .orders-header h2 {
         font-size: 20px;
         font-weight: 500;
+        margin: 0;
     }
 
 .orders-body {
@@ -219,9 +223,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 20px;
+    padding: 10px 20px;
     border-bottom: 1px solid #8d8d8d;
-    min-height: 58px;
+    min-height: 64px;
     flex-shrink: 0;
 }
 
@@ -229,17 +233,29 @@ body {
         border-bottom: none;
     }
 
+    .order-row:hover {
+        background-color: #f1ece8;
+    }
+
 .order-left {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    width: 220px;
+    gap: 8px;
+    width: 260px;
     flex-shrink: 0;
 }
 
 .order-id {
-    font-size: 14px;
-    color: #222222;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111111;
+    letter-spacing: 0.8px;
+    font-family: monospace;
+    background-color: #eeeeee;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-block;
+    width: fit-content;
 }
 
 .courier-button {
@@ -258,26 +274,27 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    min-width: 120px;
+    min-width: 130px;
     flex-shrink: 0;
 }
 
 .courier-label {
-    font-size: 14px;
-    color: #222222;
+    font-size: 13px;
+    color: #777777;
 }
 
 .courier-value {
     font-size: 16px;
     color: #222222;
+    font-weight: 600;
 }
 
 .order-right {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 4px;
-    min-width: 190px;
+    gap: 6px;
+    min-width: 220px;
     flex-shrink: 0;
 }
 
@@ -288,18 +305,23 @@ body {
 }
 
 .status-label {
-    font-size: 14px;
-    color: #222222;
+    font-size: 13px;
+    color: #777777;
 }
 
 .status-value {
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: #222222;
 }
 
 .location-text {
     font-size: 14px;
     color: #222222;
+    font-weight: 600;
+    text-align: right;
 }
 
 .orders-body::-webkit-scrollbar {
@@ -319,5 +341,5 @@ body {
     width: 18px;
     height: 18px;
     stroke: white;
-    fill: white;
+    fill: none;
 }

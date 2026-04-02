@@ -1,4 +1,11 @@
 ﻿const SearchBar = ({ searchTerm, setSearchTerm }) => {
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            console.log("Searching for:", searchTerm);
+            // later you can trigger API here if needed
+        }
+    };
+
     return (
         <div className="search-bar">
             <input
@@ -7,8 +14,20 @@
                 className="search-input"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
+                onKeyDown={handleKeyDown}
             />
 
+            {/* CLEAR BUTTON */}
+            {searchTerm && (
+                <button
+                    className="clear-button"
+                    onClick={() => setSearchTerm("")}
+                >
+                    ✕
+                </button>
+            )}
+
+            {/* SEARCH BUTTON */}
             <button className="search-button" type="button">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
