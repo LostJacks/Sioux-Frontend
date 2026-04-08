@@ -1,6 +1,12 @@
 import SearchBar from "./SearchBar";
+import ScanEmployeeQrButton from "./ScanEmployeeQrButton";
 
-const ReceptionistTopBar = ({ searchTerm, setSearchTerm }) => {
+const ReceptionistTopBar = ({
+    searchTerm,
+    setSearchTerm,
+    onScanEmployee,
+    onScanPackage
+}) => {
     return (
         <div className="top-bar">
             <SearchBar
@@ -9,8 +15,10 @@ const ReceptionistTopBar = ({ searchTerm, setSearchTerm }) => {
             />
 
             <div className="top-bar-right">
-                <button className="scan-button">Scan Package</button>
-                <button className="scan-button">Scan Employee QR</button>
+                <button className="scan-button" onClick={onScanPackage}>
+                    Scan Package
+                </button>
+                <ScanEmployeeQrButton onClick={onScanEmployee} />
             </div>
         </div>
     );

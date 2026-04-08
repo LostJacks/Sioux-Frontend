@@ -1,8 +1,7 @@
-const QrButton = () => {
+const QrButton = ({ onClick }) => {
     return (
-        <button className="qr-button">
-            <span>QR</span>
-            <span>code</span>
+        <button className="qr-button" onClick={onClick}>
+            Show QR
         </button>
     );
 };

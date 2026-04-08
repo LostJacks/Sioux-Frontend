@@ -1,64 +1,55 @@
-import { NavLink, useLocation } from "react-router-dom";
+﻿import { NavLink } from "react-router-dom";
 import siouxLogo from "../assets/sioux-logo.jpg";
 
-const Sidebar = () => {
-    const location = useLocation();
-
-    const getCurrentRole = () => {
-        if (location.pathname === "/employee") {
-            return "Employee";
-        }
-
-        if (location.pathname === "/manager") {
-            return "Manager";
-        }
-
-        if (location.pathname === "/receptionist") {
-            return "Receptionist";
-        }
-
-        return "Employee";
+const Sidebar = ({ currentRole, setCurrentRole }) => {
+    const allowedRoles = {
+        employee: [
+            { label: "Employee", path: "/employee" }
+        ],
+        manager: [
+            { label: "Employee", path: "/employee" },
+            { label: "Manager", path: "/manager" }
+        ],
+        receptionist: [
+            { label: "Employee", path: "/employee" },
+            { label: "Receptionist", path: "/receptionist" }
+        ]
     };
+
+    const visibleRoles = allowedRoles[currentRole] || allowedRoles.employee;
 
     return (
         <aside className="sidebar">
             <div className="sidebar-top">
                 <img src={siouxLogo} alt="Sioux Logo" className="logo" />
 
+                <div className="role-switch">
+                    <button onClick={() => setCurrentRole("employee")}>Employee</button>
+                    <button onClick={() => setCurrentRole("receptionist")}>Receptionist</button>
+                    <button onClick={() => setCurrentRole("manager")}>Manager</button>
+                </div>
+
                 <div className="roles-section">
                     <h2 className="roles-title">Roles</h2>
 
-                    <NavLink
-                        to="/employee"
-                        className={({ isActive }) =>
-                            isActive ? "role-button active-role" : "role-button"
-                        }
-                    >
-                        Employee
-                    </NavLink>
-
-                    <NavLink
-                        to="/manager"
-                        className={({ isActive }) =>
-                            isActive ? "role-button active-role" : "role-button"
-                        }
-                    >
-                        Manager
-                    </NavLink>
-
-                    <NavLink
-                        to="/receptionist"
-                        className={({ isActive }) =>
-                            isActive ? "role-button active-role" : "role-button"
-                        }
-                    >
-                        Receptionist
-                    </NavLink>
+                    {visibleRoles.map((item) => (
+                        <NavLink
+                            key={item.path}
+                            to={item.path}
+                            className={({ isActive }) =>
+                                isActive ? "role-button active-role" : "role-button"
+                            }
+                        >
+                            {item.label}
+                        </NavLink>
+                    ))}
                 </div>
             </div>
 
             <div className="sidebar-bottom">
-                <p className="current-role">{getCurrentRole()}</p>
+                <p className="current-role">
+                    {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
+                </p>
                 <button className="sign-out-button">Sign out</button>
             </div>
         </aside>
