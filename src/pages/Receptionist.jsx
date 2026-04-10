@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import ReceptionistTopBar from "../components/ReceptionistTopBar";
 import PackageTabs from "../components/PackageTabs";
 import ReceptionistPanel from "../components/ReceptionistPanel";
-import ScanEmployeeQrModal from "../components/ScanQrModal";
+import ScanQrModal from "../components/ScanQrModal";
 import { orders } from "../data/orders";
 
 const Receptionist = ({ currentRole, setCurrentRole }) => {
@@ -28,14 +28,32 @@ const Receptionist = ({ currentRole, setCurrentRole }) => {
         return matchesSearch;
     });
 
-    const handleScan = (scannedValue) => {
+    const handleEmployeeScan = async (employeeId) => {
+        console.log("Scanned employee ID:", employeeId);
+
+        // later:
+        // const employee = await getEmployeeByQr(employeeId);
+        // setSelectedEmployee(employee);
+    };
+
+    const handlePackageScan = async (packageId) => {
+        console.log("Scanned package ID:", packageId);
+
+        // temporary frontend behavior
+        setSearchTerm(packageId);
+
+        // later:
+        // const pkg = await getPackageByCode(packageId);
+        // setSelectedPackage(pkg);
+    };
+
+    const handleScan = async (scannedValue) => {
         if (scanType === "employee") {
-            console.log("Scanned employee ID:", scannedValue);
+            await handleEmployeeScan(scannedValue);
         }
 
         if (scanType === "package") {
-            console.log("Scanned package ID:", scannedValue);
-            setSearchTerm(scannedValue);
+            await handlePackageScan(scannedValue);
         }
 
         setScanType(null);
@@ -61,7 +79,7 @@ const Receptionist = ({ currentRole, setCurrentRole }) => {
                 <ReceptionistPanel orders={filteredOrders} />
 
                 {scanType && (
-                    <ScanEmployeeQrModal
+                    <ScanQrModal
                         title={
                             scanType === "employee"
                                 ? "Scan Employee QR"

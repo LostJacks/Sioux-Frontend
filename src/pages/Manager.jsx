@@ -1,7 +1,7 @@
 ﻿import { useState } from "react";
 import "../styles/manager.css";
 import Sidebar from "../components/Sidebar";
-import ScanEmployeeQrModal from "../components/ScanQrModal";
+import ScanQrModal from "../components/ScanQrModal";
 
 const Manager = ({ currentRole, setCurrentRole }) => {
     const [buildingSearch, setBuildingSearch] = useState("");
@@ -12,28 +12,22 @@ const Manager = ({ currentRole, setCurrentRole }) => {
             id: 1,
             name: "Main building",
             address: "Addressstraat 1",
-            floors: "2",
-            floorNames: "Floor 1\nFloor 2",
-            shelves: "2",
-            rows: "2"
+            shelves: [
+                { id: 1, name: "Shelf A", rowCount: 3 },
+                { id: 2, name: "Shelf B", rowCount: 2 }
+            ]
         },
         {
             id: 2,
             name: "Building A",
             address: "Street A 10",
-            floors: "3",
-            floorNames: "Ground floor\nFirst floor\nSecond floor",
-            shelves: "4",
-            rows: "6"
+            shelves: [{ id: 1, name: "Shelf C", rowCount: 4 }]
         },
         {
             id: 3,
             name: "Building B",
             address: "Street B 20",
-            floors: "1",
-            floorNames: "Main floor",
-            shelves: "2",
-            rows: "3"
+            shelves: [{ id: 1, name: "Shelf D", rowCount: 3 }]
         }
     ]);
 
@@ -41,41 +35,92 @@ const Manager = ({ currentRole, setCurrentRole }) => {
 
     const [name, setName] = useState("Main building");
     const [address, setAddress] = useState("Addressstraat 1");
-    const [floors, setFloors] = useState("2");
-    const [floorNames, setFloorNames] = useState("Floor 1\nFloor 2");
-    const [shelves, setShelves] = useState("2");
-    const [rows, setRows] = useState("2");
+
+    const [shelfName, setShelfName] = useState("");
+    const [shelfRowCount, setShelfRowCount] = useState("");
+    const [shelves, setShelves] = useState([
+        { id: 1, name: "Shelf A", rowCount: 3 },
+        { id: 2, name: "Shelf B", rowCount: 2 }
+    ]);
+
+    const loadBuildingIntoForm = (building) => {
+        setSelectedBuilding(building.name);
+        setName(building.name);
+        setAddress(building.address);
+        setShelves(building.shelves || []);
+        setShelfName("");
+        setShelfRowCount("");
+    };
 
     const handleBuildingChange = (e) => {
         const buildingName = e.target.value;
-        setSelectedBuilding(buildingName);
-
         const building = buildings.find((item) => item.name === buildingName);
 
         if (building) {
-            setName(building.name);
-            setAddress(building.address);
-            setFloors(building.floors);
-            setFloorNames(building.floorNames);
-            setShelves(building.shelves);
-            setRows(building.rows);
+            loadBuildingIntoForm(building);
         }
+    };
+
+    const handleSearchBuilding = () => {
+        const trimmedSearch = buildingSearch.trim().toLowerCase();
+
+        if (!trimmedSearch) {
+            return;
+        }
+
+        const foundBuilding = buildings.find((building) =>
+            building.name.toLowerCase().includes(trimmedSearch)
+        );
+
+        if (!foundBuilding) {
+            return;
+        }
+
+        loadBuildingIntoForm(foundBuilding);
     };
 
     const handleAddBuilding = () => {
         setSelectedBuilding("");
         setName("");
         setAddress("");
-        setFloors("");
-        setFloorNames("");
-        setShelves("");
-        setRows("");
+        setShelves([]);
+        setShelfName("");
+        setShelfRowCount("");
+    };
+
+    const handleAddShelf = () => {
+        const trimmedShelfName = shelfName.trim();
+        const parsedRowCount = Number(shelfRowCount);
+
+        if (
+            !trimmedShelfName ||
+            !shelfRowCount.trim() ||
+            Number.isNaN(parsedRowCount) ||
+            parsedRowCount <= 0
+        ) {
+            return;
+        }
+
+        const newShelf = {
+            id: Date.now(),
+            name: trimmedShelfName,
+            rowCount: parsedRowCount
+        };
+
+        setShelves((prev) => [...prev, newShelf]);
+        setShelfName("");
+        setShelfRowCount("");
+    };
+
+    const handleRemoveShelf = (shelfId) => {
+        setShelves((prev) => prev.filter((shelf) => shelf.id !== shelfId));
     };
 
     const handleSaveBuilding = () => {
         const trimmedName = name.trim();
+        const trimmedAddress = address.trim();
 
-        if (!trimmedName) {
+        if (!trimmedName || !trimmedAddress) {
             return;
         }
 
@@ -85,41 +130,35 @@ const Manager = ({ currentRole, setCurrentRole }) => {
 
         const buildingData = {
             id: existingIndex >= 0 ? buildings[existingIndex].id : Date.now(),
-            name,
-            address,
-            floors,
-            floorNames,
-            shelves,
-            rows
+            name: trimmedName,
+            address: trimmedAddress,
+            shelves: shelves.map((shelf) => ({
+                id: shelf.id,
+                name: shelf.name,
+                rowCount: shelf.rowCount
+            }))
         };
 
         if (existingIndex >= 0) {
             const updatedBuildings = [...buildings];
             updatedBuildings[existingIndex] = buildingData;
             setBuildings(updatedBuildings);
-            setSelectedBuilding(name);
         } else {
             setBuildings([...buildings, buildingData]);
-            setSelectedBuilding(name);
         }
+
+        setSelectedBuilding(trimmedName);
+        console.log("Building payload:", buildingData);
     };
 
     const handleEmployeeQrScan = (employeeId) => {
         console.log("Scanned employee ID:", employeeId);
         setShowScanEmployeeQrModal(false);
-
-        // later:
-        // fetch employee info here
     };
 
     const filteredBuildings = buildings.filter((building) =>
         building.name.toLowerCase().includes(buildingSearch.toLowerCase())
     );
-
-    const floorList = floorNames
-        .split("\n")
-        .map((floor) => floor.trim())
-        .filter((floor) => floor !== "");
 
     return (
         <div className="dashboard">
@@ -133,8 +172,19 @@ const Manager = ({ currentRole, setCurrentRole }) => {
                             placeholder="Building search"
                             value={buildingSearch}
                             onChange={(e) => setBuildingSearch(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    handleSearchBuilding();
+                                }
+                            }}
                         />
-                        <button className="manager-search-button">🔍</button>
+                        <button
+                            className="manager-search-button"
+                            type="button"
+                            onClick={handleSearchBuilding}
+                        >
+                            🔍
+                        </button>
                     </div>
 
                     <button
@@ -165,6 +215,7 @@ const Manager = ({ currentRole, setCurrentRole }) => {
                     <button
                         className="add-building-button"
                         onClick={handleAddBuilding}
+                        type="button"
                     >
                         Add building
                     </button>
@@ -172,7 +223,11 @@ const Manager = ({ currentRole, setCurrentRole }) => {
 
                 <div className="building-info-header">
                     <h2>Building information</h2>
-                    <button className="edit-button" onClick={handleSaveBuilding}>
+                    <button
+                        className="edit-button"
+                        onClick={handleSaveBuilding}
+                        type="button"
+                    >
                         Save
                     </button>
                 </div>
@@ -195,62 +250,73 @@ const Manager = ({ currentRole, setCurrentRole }) => {
                             onChange={(e) => setAddress(e.target.value)}
                         />
                     </div>
+                </div>
 
-                    <div className="form-group small-group">
-                        <label>Amount of floors</label>
+                <div className="building-info-header">
+                    <h2>Shelves</h2>
+                </div>
+
+                <div className="shelf-input-row">
+                    <div className="form-group shelf-input-group">
+                        <label>Shelf name</label>
                         <input
                             type="text"
-                            value={floors}
-                            onChange={(e) => setFloors(e.target.value)}
+                            value={shelfName}
+                            onChange={(e) => setShelfName(e.target.value)}
+                            placeholder="Enter shelf name"
                         />
                     </div>
+
+                    <div className="form-group shelf-input-group">
+                        <label>Amount of rows</label>
+                        <input
+                            type="number"
+                            value={shelfRowCount}
+                            onChange={(e) => setShelfRowCount(e.target.value)}
+                            placeholder="Enter row amount"
+                        />
+                    </div>
+
+                    <button
+                        className="add-shelf-button"
+                        onClick={handleAddShelf}
+                        type="button"
+                    >
+                        Add shelf
+                    </button>
                 </div>
 
                 <div className="form-group full-width-group">
-                    <label>Floor names</label>
-
-                    <textarea
-                        value={floorNames}
-                        onChange={(e) => setFloorNames(e.target.value)}
-                        rows={3}
-                        placeholder="Type one floor per line"
-                    />
+                    <label>Added shelves</label>
 
                     <div className="floor-names-box">
-                        {floorList.length > 0 ? (
-                            floorList.map((floor, index) => (
-                                <div key={index} className="floor-row">
-                                    {index + 1}. {floor}
+                        {shelves.length > 0 ? (
+                            shelves.map((shelf, index) => (
+                                <div key={shelf.id} className="floor-row">
+                                    <span>
+                                        {index + 1}. {shelf.name} — {shelf.rowCount} rows
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        className="remove-shelf-button"
+                                        onClick={() => handleRemoveShelf(shelf.id)}
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
                             ))
                         ) : (
-                            <div className="floor-row empty-floor-row">No floors added</div>
+                            <div className="floor-row empty-floor-row">
+                                No shelves added
+                            </div>
                         )}
                     </div>
                 </div>
 
-                <div className="manager-form-grid bottom-grid">
-                    <div className="form-group small-group">
-                        <label>Amount of shelves</label>
-                        <input
-                            type="text"
-                            value={shelves}
-                            onChange={(e) => setShelves(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="form-group small-group">
-                        <label>Amount of rows</label>
-                        <input
-                            type="text"
-                            value={rows}
-                            onChange={(e) => setRows(e.target.value)}
-                        />
-                    </div>
-                </div>
-
                 {showScanEmployeeQrModal && (
-                    <ScanEmployeeQrModal
+                    <ScanQrModal
+                        title="Scan Employee QR"
                         onClose={() => setShowScanEmployeeQrModal(false)}
                         onScan={handleEmployeeQrScan}
                     />

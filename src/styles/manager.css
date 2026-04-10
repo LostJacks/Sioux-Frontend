@@ -406,3 +406,47 @@ body {
     align-items: center;
     gap: 14px;
 }
+
+.shelf-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.shelf-input-group {
+    width: 190px;
+}
+
+.add-shelf-button {
+    height: 44px;
+    padding: 0 16px;
+    border: 1px solid #8a3d16;
+    border-radius: 8px;
+    background-color: #ff6b2c;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.remove-shelf-button {
+    margin-left: auto;
+    border: 1px solid #8a3d16;
+    border-radius: 8px;
+    background-color: #ff6b2c;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.building-info-header {
+    margin-top: 40px;
+}
+
+.manager-form-grid {
+    margin-bottom: 20px;
+}
