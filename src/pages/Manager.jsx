@@ -1,47 +1,42 @@
-﻿import { useState } from "react";
+﻿import { useState, useEffect } from "react";
 import "../styles/manager.css";
 import Sidebar from "../components/Sidebar";
 import ScanQrModal from "../components/ScanQrModal";
 
 const Manager = ({ currentRole, setCurrentRole }) => {
+    const [buildings, setBuildings] = useState([]);
+
     const [buildingSearch, setBuildingSearch] = useState("");
     const [showScanEmployeeQrModal, setShowScanEmployeeQrModal] = useState(false);
 
-    const [buildings, setBuildings] = useState([
-        {
-            id: 1,
-            name: "Main building",
-            address: "Addressstraat 1",
-            shelves: [
-                { id: 1, name: "Shelf A", rowCount: 3 },
-                { id: 2, name: "Shelf B", rowCount: 2 }
-            ]
-        },
-        {
-            id: 2,
-            name: "Building A",
-            address: "Street A 10",
-            shelves: [{ id: 1, name: "Shelf C", rowCount: 4 }]
-        },
-        {
-            id: 3,
-            name: "Building B",
-            address: "Street B 20",
-            shelves: [{ id: 1, name: "Shelf D", rowCount: 3 }]
-        }
-    ]);
-
-    const [selectedBuilding, setSelectedBuilding] = useState("Main building");
-
-    const [name, setName] = useState("Main building");
-    const [address, setAddress] = useState("Addressstraat 1");
+    const [selectedBuilding, setSelectedBuilding] = useState("");
+    const [name, setName] = useState("");
+    const [address, setAddress] = useState("");
 
     const [shelfName, setShelfName] = useState("");
     const [shelfRowCount, setShelfRowCount] = useState("");
-    const [shelves, setShelves] = useState([
-        { id: 1, name: "Shelf A", rowCount: 3 },
-        { id: 2, name: "Shelf B", rowCount: 2 }
-    ]);
+
+    const [shelves, setShelves] = useState([]);
+
+    useEffect(() => {
+        fetch("http://localhost:8080/api/buildings")
+            .then(res => res.json())
+            .then(data => {
+                const mapped = data.map(b => ({
+                    id: b.id,
+                    name: b.name,
+                    address: b.address,
+                    shelves: (b.floors?.[0]?.shelves || []).map(s => ({
+                        id: s.id,
+                        name: `Shelf ${s.id}`,
+                        rowCount: s.rows?.length || 0
+                    }))
+                }));
+
+                setBuildings(mapped);
+            })
+            .catch(err => console.error(err));
+    }, []);
 
     const loadBuildingIntoForm = (building) => {
         setSelectedBuilding(building.name);
@@ -116,39 +111,26 @@ const Manager = ({ currentRole, setCurrentRole }) => {
         setShelves((prev) => prev.filter((shelf) => shelf.id !== shelfId));
     };
 
-    const handleSaveBuilding = () => {
-        const trimmedName = name.trim();
-        const trimmedAddress = address.trim();
+    const handleSaveBuilding = async () => {
+        const payload = {
+            name,
+            address,
+            shelves
+        };
 
-        if (!trimmedName || !trimmedAddress) {
+        const res = await fetch("http://localhost:8080/api/buildings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            console.error("FAILED:", await res.text());
             return;
         }
 
-        const existingIndex = buildings.findIndex(
-            (building) => building.name === selectedBuilding
-        );
-
-        const buildingData = {
-            id: existingIndex >= 0 ? buildings[existingIndex].id : Date.now(),
-            name: trimmedName,
-            address: trimmedAddress,
-            shelves: shelves.map((shelf) => ({
-                id: shelf.id,
-                name: shelf.name,
-                rowCount: shelf.rowCount
-            }))
-        };
-
-        if (existingIndex >= 0) {
-            const updatedBuildings = [...buildings];
-            updatedBuildings[existingIndex] = buildingData;
-            setBuildings(updatedBuildings);
-        } else {
-            setBuildings([...buildings, buildingData]);
-        }
-
-        setSelectedBuilding(trimmedName);
-        console.log("Building payload:", buildingData);
+        const data = await res.json();
+        console.log("SUCCESS:", data);
     };
 
     const handleEmployeeQrScan = (employeeId) => {
