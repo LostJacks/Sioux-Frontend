@@ -5,10 +5,12 @@ import { useNotification } from "../context/NotificationContext";
 const OrdersPanel = ({ orders }) => {
     const { showNotification } = useNotification();
 
+    const firstOrderId = orders.length > 0 ? orders[0].id : null;
+
     const handleArrivalNotification = async () => {
+        if (!firstOrderId) return;
         try {
-            const data = await getArrivalNotification(1);
-            console.log("Arrival notification response:", data);
+            const data = await getArrivalNotification(firstOrderId);
             showNotification(data);
         } catch (error) {
             console.error("Arrival notification error:", error);
@@ -16,9 +18,9 @@ const OrdersPanel = ({ orders }) => {
     };
 
     const handleReminderNotification = async () => {
+        if (!firstOrderId) return;
         try {
-            const data = await getPickupReminder(1);
-            console.log("Reminder notification response:", data);
+            const data = await getPickupReminder(firstOrderId);
             showNotification(data);
         } catch (error) {
             console.error("Reminder notification error:", error);
@@ -27,18 +29,18 @@ const OrdersPanel = ({ orders }) => {
 
     return (
         <section className="orders-wrapper">
-            <p className="last-update">Last update: Today, 13:45</p>
+            <p className="last-update">Connected to backend</p>
 
             <div className="orders-panel">
                 <div className="orders-header">
                     <h2>My Orders</h2>
 
                     <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                        <button onClick={handleArrivalNotification}>
+                        <button onClick={handleArrivalNotification} disabled={!firstOrderId}>
                             Test Arrival Notification
                         </button>
 
-                        <button onClick={handleReminderNotification}>
+                        <button onClick={handleReminderNotification} disabled={!firstOrderId}>
                             Test Reminder Notification
                         </button>
                     </div>
@@ -46,9 +48,7 @@ const OrdersPanel = ({ orders }) => {
 
                 <div className="orders-body">
                     {orders.length > 0 ? (
-                        orders.map((order, index) => (
-                            <OrderRow key={`${order.id}-${index}`} order={order} />
-                        ))
+                        orders.map((order) => <OrderRow key={order.id} order={order} />)
                     ) : (
                         <p className="no-orders-text">No orders found.</p>
                     )}

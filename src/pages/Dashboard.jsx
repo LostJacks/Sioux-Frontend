@@ -1,21 +1,28 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import "../styles/employee.css";
 import Sidebar from "../components/Sidebar";
 import SearchBar from "../components/SearchBar";
 import QrButton from "../components/QrButton";
 import OrdersPanel from "../components/OrdersPanel";
-import EmployeeQrModal from "../components/EmployeeQrModal"; // 👈 ADD THIS
-import { orders } from "../data/orders";
+import EmployeeQrModal from "../components/EmployeeQrModal";
+import { getOrdersForEmployee } from "../services/orderApi";
 
 const Dashboard = ({ currentRole, setCurrentRole }) => {
     const [searchTerm, setSearchTerm] = useState("");
-    const [showQrModal, setShowQrModal] = useState(false); // 👈 ADD THIS
+    const [showQrModal, setShowQrModal] = useState(false);
+    const [orders, setOrders] = useState([]);
+
+    const employeeId = 1;
+
+    useEffect(() => {
+        getOrdersForEmployee(employeeId)
+            .then(setOrders)
+            .catch((err) => console.error(err));
+    }, []);
 
     const filteredOrders = orders.filter((order) =>
-        order.id.toLowerCase().includes(searchTerm.toLowerCase())
+        (order.trackingNumber || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    const employeeId = 1; // 👈 replace later with real user.id
 
     return (
         <div className="dashboard">
@@ -23,18 +30,12 @@ const Dashboard = ({ currentRole, setCurrentRole }) => {
 
             <main className="main-content">
                 <div className="top-bar">
-                    <SearchBar
-                        searchTerm={searchTerm}
-                        setSearchTerm={setSearchTerm}
-                    />
-
-                    {/* 👇 CONNECT BUTTON */}
+                    <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
                     <QrButton onClick={() => setShowQrModal(true)} />
                 </div>
 
                 <OrdersPanel orders={filteredOrders} />
 
-                {/* 👇 MODAL */}
                 {showQrModal && (
                     <EmployeeQrModal
                         employeeId={employeeId}
