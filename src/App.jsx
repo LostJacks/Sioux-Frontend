@@ -1,17 +1,24 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import Receptionist from "./pages/Receptionist";
 import Manager from "./pages/Manager";
+import LoginPage from "./pages/LoginPage";
 import { NotificationProvider } from "./context/NotificationContext";
 
 const App = () => {
-    const [currentRole, setCurrentRole] = useState("receptionist");
+    const [currentRole, setCurrentRole] = useState("");
 
     return (
         <NotificationProvider>
             <Routes>
-                <Route path="/" element={<Navigate to="/employee" replace />} />
+                {/* LOGIN PAGE */}
+                <Route
+                    path="/"
+                    element={<LoginPage setCurrentRole={setCurrentRole} />}
+                />
+
+                {/* PAGES */}
                 <Route
                     path="/employee"
                     element={
