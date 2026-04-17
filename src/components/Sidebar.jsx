@@ -6,15 +6,18 @@ const Sidebar = ({ currentRole, setCurrentRole }) => {
 
     const allowedRoles = {
         employee: [
-            { label: "Employee", path: "/employee" }
+            { label: "Employee", path: "/employee" },
+            { label: "Notifications", path: "/notifications" }
         ],
         manager: [
             { label: "Employee", path: "/employee" },
-            { label: "Manager", path: "/manager" }
+            { label: "Manager", path: "/manager" },
+            { label: "Notifications", path: "/notifications" }
         ],
         receptionist: [
             { label: "Employee", path: "/employee" },
-            { label: "Receptionist", path: "/receptionist" }
+            { label: "Receptionist", path: "/receptionist" },
+            { label: "Notifications", path: "/notifications" }
         ]
     };
 
@@ -38,7 +41,9 @@ const Sidebar = ({ currentRole, setCurrentRole }) => {
                             key={item.path}
                             to={item.path}
                             className={({ isActive }) =>
-                                isActive ? "role-button active-role" : "role-button"
+                                isActive
+                                    ? "role-button active-role"
+                                    : "role-button"
                             }
                         >
                             {item.label}
