@@ -1,6 +1,6 @@
 import OrderRow from "./OrderRow";
 import { getArrivalNotification, getPickupReminder } from "../services/orderApi";
-import { useNotification } from "../context/NotificationContext";
+import { useNotification } from "../hooks/useNotification";
 
 const OrdersPanel = ({ orders }) => {
     const { showNotification } = useNotification();

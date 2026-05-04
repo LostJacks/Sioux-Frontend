@@ -1,4 +1,4 @@
-const OrderRow = ({ order }) => {
+const OrderRow = ({ order, onNotifyManagers }) => {
     const handleTrack = () => {
         const courierName = order.courier.trim().toLowerCase();
 
@@ -35,6 +35,17 @@ const OrderRow = ({ order }) => {
                 >
                     Courier website
                 </button>
+
+                {typeof onNotifyManagers === "function" && (
+                    <button
+                        type="button"
+                        className="courier-button"
+                        style={{ marginTop: 6 }}
+                        onClick={() => onNotifyManagers(order)}
+                    >
+                        Notify managers
+                    </button>
+                )}
             </div>
 
             <div className="order-middle">
