@@ -3,6 +3,7 @@ import { useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import Receptionist from "./pages/Receptionist";
 import Manager from "./pages/Manager";
+import Notifications from "./pages/Notifications";
 import { NotificationProvider } from "./context/NotificationContext";
 
 const App = () => {
@@ -34,6 +35,15 @@ const App = () => {
                     path="/manager"
                     element={
                         <Manager
+                            currentRole={currentRole}
+                            setCurrentRole={setCurrentRole}
+                        />
+                    }
+                />
+                <Route
+                    path="/notifications"
+                    element={
+                        <Notifications
                             currentRole={currentRole}
                             setCurrentRole={setCurrentRole}
                         />
