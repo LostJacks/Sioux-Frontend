@@ -6,11 +6,14 @@ import QrButton from "../components/QrButton";
 import OrdersPanel from "../components/OrdersPanel";
 import EmployeeQrModal from "../components/EmployeeQrModal";
 import { getOrdersForEmployee } from "../services/orderApi";
+import { useNotification } from "../context/NotificationContext";
 
 const Dashboard = ({ currentRole, setCurrentRole }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [showQrModal, setShowQrModal] = useState(false);
     const [orders, setOrders] = useState([]);
+
+    const { showNotification } = useNotification();
 
     const employeeId = 1;
 
@@ -21,17 +24,39 @@ const Dashboard = ({ currentRole, setCurrentRole }) => {
     }, []);
 
     const filteredOrders = orders.filter((order) =>
-        (order.trackingNumber || "").toLowerCase().includes(searchTerm.toLowerCase())
+        (order.trackingNumber || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
     );
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} />
+            <Sidebar
+                currentRole={currentRole}
+                setCurrentRole={setCurrentRole}
+            />
 
             <main className="main-content">
                 <div className="top-bar">
-                    <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                    <SearchBar
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                    />
+
                     <QrButton onClick={() => setShowQrModal(true)} />
+
+                    <button
+                        onClick={() =>
+                            showNotification({
+                                title: "New Package Arrived",
+                                message:
+                                    "You have a package waiting at reception.",
+                                createdAt: new Date().toISOString()
+                            })
+                        }
+                    >
+                        Test Notification
+                    </button>
                 </div>
 
                 <OrdersPanel orders={filteredOrders} />

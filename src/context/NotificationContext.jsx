@@ -5,6 +5,7 @@ const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
     const [notification, setNotification] = useState(null);
+    const [notificationHistory, setNotificationHistory] = useState([]);
 
     useEffect(() => {
         if (!notification) return;
@@ -17,7 +18,18 @@ export const NotificationProvider = ({ children }) => {
     }, [notification]);
 
     const showNotification = (data) => {
-        setNotification(data);
+        const newNotification = {
+            ...data,
+            id: Date.now(),
+            createdAt: data.createdAt || new Date().toISOString()
+        };
+
+        setNotification(newNotification);
+
+        setNotificationHistory((prev) => [
+            newNotification,
+            ...prev
+        ]);
     };
 
     const closeNotification = () => {
@@ -25,7 +37,9 @@ export const NotificationProvider = ({ children }) => {
     };
 
     return (
-        <NotificationContext.Provider value={{ showNotification }}>
+        <NotificationContext.Provider
+            value={{ showNotification, notificationHistory }}
+        >
             <NotificationPopup
                 notification={notification}
                 onClose={closeNotification}

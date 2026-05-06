@@ -1,57 +1,35 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
+import { useNotification } from "../context/NotificationContext";
 import "../styles/NotificationHistory.css";
 
 const NotificationHistory = ({ currentRole, setCurrentRole }) => {
-    const notifications = [
-        {
-            id: 1,
-            title: "Package ready for pickup",
-            message: "Your package is ready at the reception desk.",
-            date: "17 Apr 2026",
-            time: "10:30",
-            type: "info"
-        },
-        {
-            id: 2,
-            title: "Package received",
-            message: "A new package has been registered for you.",
-            date: "16 Apr 2026",
-            time: "14:10",
-            type: "success"
-        },
-        {
-            id: 3,
-            title: "Reminder",
-            message: "Please pick up your package before the end of the day.",
-            date: "15 Apr 2026",
-            time: "09:00",
-            type: "warning"
-        },
-        {
-            id: 4,
-            title: "Package delayed",
-            message: "Your package delivery has been delayed by one day.",
-            date: "14 Apr 2026",
-            time: "11:20",
-            type: "warning"
-        },
-        {
-            id: 5,
-            title: "Pickup confirmed",
-            message: "Your package pickup has been confirmed successfully.",
-            date: "13 Apr 2026",
-            time: "16:45",
-            type: "success"
-        }
-    ];
-
+    const { notificationHistory } = useNotification();
     const [selectedFilter, setSelectedFilter] = useState("all");
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "";
+
+        return new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }).format(new Date(dateString));
+    };
+
+    const formatTime = (dateString) => {
+        if (!dateString) return "";
+
+        return new Intl.DateTimeFormat("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit"
+        }).format(new Date(dateString));
+    };
 
     const filteredNotifications =
         selectedFilter === "all"
-            ? notifications
-            : notifications.filter(
+            ? notificationHistory
+            : notificationHistory.filter(
                 (notification) => notification.type === selectedFilter
             );
 
@@ -115,7 +93,7 @@ const NotificationHistory = ({ currentRole, setCurrentRole }) => {
                         filteredNotifications.map((notification) => (
                             <div
                                 key={notification.id}
-                                className={`notification-history-card ${notification.type}`}
+                                className={`notification-history-card ${notification.type || "info"}`}
                             >
                                 <div className="notification-accent"></div>
 
@@ -123,14 +101,18 @@ const NotificationHistory = ({ currentRole, setCurrentRole }) => {
                                     <div className="notification-history-card-top">
                                         <div className="notification-title-group">
                                             <h3>{notification.title}</h3>
-                                            <span className={`notification-badge ${notification.type}`}>
-                                                {notification.type}
+                                            <span className={`notification-badge ${notification.type || "info"}`}>
+                                                {notification.type || "info"}
                                             </span>
                                         </div>
 
                                         <div className="notification-date-group">
-                                            <span className="notification-date">{notification.date}</span>
-                                            <span className="notification-time">{notification.time}</span>
+                                            <span className="notification-date">
+                                                {formatDate(notification.createdAt)}
+                                            </span>
+                                            <span className="notification-time">
+                                                {formatTime(notification.createdAt)}
+                                            </span>
                                         </div>
                                     </div>
 

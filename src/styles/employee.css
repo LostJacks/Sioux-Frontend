@@ -426,39 +426,77 @@ body {
         margin: 0;
     }
 
-/* NOTIFICATION */
 .notification-popup {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    background: #1f1f1f;
-    color: white;
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    top: 24px;
+    right: 24px;
+    width: 360px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px 22px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
     z-index: 9999;
+    animation: slideInNotification 0.25s ease-out;
+    border-left: 6px solid #3b82f6; /* same blue as Info */
 }
 
-    .notification-popup h3 {
-        margin: 0 0 8px 0;
-        font-size: 18px;
-    }
-
-    .notification-popup p {
-        margin: 0 0 8px 0;
-        font-size: 14px;
-    }
-
-    .notification-popup small {
-        color: #cfcfcf;
-    }
-
 .notification-close {
-    float: right;
-    background: transparent;
+    position: absolute;
+    top: 12px;
+    right: 14px;
     border: none;
-    color: white;
-    font-size: 20px;
+    background: transparent;
+    font-size: 22px;
     cursor: pointer;
+    color: #94a3b8;
+    line-height: 1;
+}
+
+    .notification-close:hover {
+        color: #0f172a;
+    }
+
+.notification-popup h3 {
+    margin: 0 28px 10px 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.notification-popup p {
+    margin: 0 0 14px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #475569;
+}
+
+.notification-popup small {
+    display: block;
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* Optional badge if you add one later */
+.notification-popup .notification-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+@keyframes slideInNotification {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
