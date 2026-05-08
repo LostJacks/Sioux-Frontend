@@ -24,6 +24,7 @@ const INITIAL_GLOBAL_STATE = { status: "idle", list: [], error: null };
 const TYPE_CATEGORY = {
     ORDER_ARRIVED: "info",
     PICKUP_REMINDER: "warning",
+    PICKUP_CONFIRMED: "success",
     COMPANY_PACKAGE: "success",
     UNADDRESSED_PACKAGE: "warning"
 };
