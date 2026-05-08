@@ -1,5 +1,4 @@
 import {
-    createContext,
     useCallback,
     useEffect,
     useMemo,
@@ -7,16 +6,12 @@ import {
     useState
 } from "react";
 import NotificationPopup from "../components/NotificationPopup";
+import { NotificationContext } from "./NotificationContextStore";
 import {
     listForEmployee,
     listSince,
     markAsRead as apiMarkAsRead
 } from "../services/NotificationApi";
-
-// Exported so the standalone hook in `hooks/useNotification.js` can
-// subscribe. Fast-refresh prefers .jsx files to export only components,
-// hence the split.
-export const NotificationContext = createContext();
 
 const DEFAULT_POLL_MS = 15000;
 const TOAST_VISIBLE_MS = 5000;
@@ -34,7 +29,7 @@ const maxIdIn = (list) =>
  * and keeps the legacy `showNotification(data)` call site working so the
  * OrdersPanel "Test Arrival Notification" button still pops a toast.
  */
-export const NotificationProvider = ({
+const NotificationProvider = ({
     children,
     userId = 1,
     pollMs = DEFAULT_POLL_MS
@@ -147,3 +142,6 @@ export const NotificationProvider = ({
         </NotificationContext.Provider>
     );
 };
+
+export default NotificationProvider;
+export { NotificationProvider };

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { NotificationContext } from "../context/NotificationContext";
+import { NotificationContext } from "../context/NotificationContextStore";
 
 /**
  * Convenience hook that exposes the NotificationContext value.

@@ -1,81 +1,77 @@
 import { useEffect, useMemo, useState } from "react";
-import "../styles/notifications.css";
+import "../styles/NotificationHistory.css";
 import Sidebar from "../components/Sidebar";
 import { useNotification } from "../hooks/useNotification";
 import { listGlobalForManager } from "../services/NotificationApi";
 
-const TABS = {
+const SCOPE_FILTERS = {
+    ALL: "all",
     MINE: "mine",
     GLOBAL: "global"
 };
 
+const TYPE_FILTERS = {
+    ALL: "all",
+    INFO: "info",
+    SUCCESS: "success",
+    WARNING: "warning"
+};
+
 const INITIAL_GLOBAL_STATE = { status: "idle", list: [], error: null };
 
-const formatDateTime = (value) => {
+// Map our backend NotificationType to Jack's visual category (info / success
+// / warning) so we can reuse his card accent + badge styling.
+const TYPE_CATEGORY = {
+    ORDER_ARRIVED: "info",
+    PICKUP_REMINDER: "warning",
+    COMPANY_PACKAGE: "success",
+    UNADDRESSED_PACKAGE: "warning"
+};
+
+const categoryFor = (n) => TYPE_CATEGORY[n.type] || "info";
+
+const formatDate = (value) => {
     if (!value) return "";
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return value;
     return new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "short",
-        year: "numeric",
+        year: "numeric"
+    }).format(date);
+};
+
+const formatTime = (value) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return new Intl.DateTimeFormat("en-GB", {
         hour: "2-digit",
         minute: "2-digit"
     }).format(date);
 };
 
-const NotificationRow = ({ notification, onSelect }) => {
-    const isGlobal = notification.scope === "GLOBAL";
-    const isUnread = !notification.read;
-
-    return (
-        <div
-            className={`notification-row${isUnread ? " unread" : ""}`}
-            onClick={() => onSelect(notification)}
-        >
-            <div className="notification-row-top">
-                <h3 className="notification-row-title">{notification.title}</h3>
-                <span className="notification-row-time">
-                    {formatDateTime(notification.createdAt)}
-                </span>
-            </div>
-
-            <p className="notification-row-message">{notification.message}</p>
-
-            <div className="notification-row-meta">
-                <span className={`notification-tag ${isGlobal ? "global" : "personal"}`}>
-                    {isGlobal ? "Global" : "Personal"}
-                </span>
-                {notification.type && (
-                    <span className="notification-tag">
-                        {notification.type.replace(/_/g, " ").toLowerCase()}
-                    </span>
-                )}
-                {isUnread && (
-                    <span className="notification-tag unread-dot">unread</span>
-                )}
-            </div>
-        </div>
-    );
-};
-
 const Notifications = ({ currentRole, setCurrentRole }) => {
     const { notifications, refresh, markRead, userId } = useNotification();
 
-    const [activeTab, setActiveTab] = useState(TABS.MINE);
+    const [scopeFilter, setScopeFilter] = useState(SCOPE_FILTERS.ALL);
+    const [typeFilter, setTypeFilter] = useState(TYPE_FILTERS.ALL);
     const [globalState, setGlobalState] = useState(INITIAL_GLOBAL_STATE);
 
     const isManager = currentRole === "manager";
 
-    const effectiveTab =
-        !isManager && activeTab === TABS.GLOBAL ? TABS.MINE : activeTab;
-
+    // Personal feed comes from context. Global is fetched separately so we
+    // can show it inside the same list when the manager picks the Global
+    // (or All) scope filter.
     useEffect(() => {
         refresh();
     }, [refresh]);
 
     useEffect(() => {
-        if (effectiveTab !== TABS.GLOBAL || !isManager) return undefined;
+        if (!isManager) return undefined;
+        if (scopeFilter !== SCOPE_FILTERS.GLOBAL && scopeFilter !== SCOPE_FILTERS.ALL) {
+            return undefined;
+        }
 
         let cancelled = false;
         listGlobalForManager(userId)
@@ -99,87 +95,232 @@ const Notifications = ({ currentRole, setCurrentRole }) => {
         return () => {
             cancelled = true;
         };
-    }, [effectiveTab, isManager, userId]);
+    }, [scopeFilter, isManager, userId]);
 
+    // Build the merged list based on the active scope filter. Global rows are
+    // tagged so we can de-dupe against personal copies of the same row.
     const personalList = useMemo(
         () => (Array.isArray(notifications) ? notifications : []),
         [notifications]
     );
 
-    const handleSelect = (notification) => {
-        if (!notification || !notification.id || notification.read) return;
-        markRead(notification.id);
+    const merged = useMemo(() => {
+        if (!isManager) return personalList;
+
+        if (scopeFilter === SCOPE_FILTERS.MINE) {
+            return personalList.filter((n) => n.scope !== "GLOBAL");
+        }
+        if (scopeFilter === SCOPE_FILTERS.GLOBAL) {
+            return globalState.list;
+        }
+
+        // All — combine both, de-duped on id, newest first.
+        const seen = new Set();
+        const combined = [];
+        for (const n of [...personalList, ...globalState.list]) {
+            if (!n || seen.has(n.id)) continue;
+            seen.add(n.id);
+            combined.push(n);
+        }
+        combined.sort((a, b) => {
+            const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return tb - ta;
+        });
+        return combined;
+    }, [isManager, scopeFilter, personalList, globalState.list]);
+
+    const filtered = useMemo(() => {
+        if (typeFilter === TYPE_FILTERS.ALL) return merged;
+        return merged.filter((n) => categoryFor(n) === typeFilter);
+    }, [merged, typeFilter]);
+
+    const handleSelect = (n) => {
+        if (!n || !n.id || n.read) return;
+        markRead(n.id);
     };
 
-    const loadingGlobal =
-        effectiveTab === TABS.GLOBAL && globalState.status === "idle";
+    const globalLoading =
+        isManager &&
+        (scopeFilter === SCOPE_FILTERS.GLOBAL || scopeFilter === SCOPE_FILTERS.ALL) &&
+        globalState.status === "idle";
     const globalError = globalState.error;
 
-    const visible =
-        effectiveTab === TABS.GLOBAL ? globalState.list : personalList;
+    const eyebrow =
+        currentRole === "manager"
+            ? "Manager portal"
+            : currentRole === "receptionist"
+                ? "Receptionist portal"
+                : "Employee portal";
 
     return (
         <div className="dashboard">
             <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} />
 
-            <main className="notifications-content">
-                <div className="notifications-header">
-                    <h1>Notifications</h1>
-                    <span className="notifications-meta">
-                        {personalList.length} in your feed
-                    </span>
+            <main className="notification-history-page">
+                <div className="notification-history-header">
+                    <div>
+                        <p className="notification-history-eyebrow">{eyebrow}</p>
+                        <h1>Notification history</h1>
+                        <p className="notification-history-subtitle">
+                            All notifications addressed to you, sorted from
+                            newest to oldest. Click an unread row to mark it
+                            as read.
+                        </p>
+                    </div>
+
+                    <div className="notification-history-summary">
+                        <span className="summary-label">Showing</span>
+                        <span className="summary-value">{filtered.length}</span>
+                    </div>
                 </div>
 
-                <div className="notifications-tabs">
-                    <button
-                        type="button"
-                        className={`notifications-tab${effectiveTab === TABS.MINE ? " active" : ""}`}
-                        onClick={() => setActiveTab(TABS.MINE)}
-                    >
-                        Mine
-                    </button>
-
-                    {isManager && (
+                {isManager && (
+                    <div className="notification-filters">
                         <button
                             type="button"
-                            className={`notifications-tab${effectiveTab === TABS.GLOBAL ? " active" : ""}`}
-                            onClick={() => {
-                                setActiveTab(TABS.GLOBAL);
-                                setGlobalState(INITIAL_GLOBAL_STATE);
-                            }}
+                            className={
+                                scopeFilter === SCOPE_FILTERS.ALL
+                                    ? "filter-button active"
+                                    : "filter-button"
+                            }
+                            onClick={() => setScopeFilter(SCOPE_FILTERS.ALL)}
+                        >
+                            Everything
+                        </button>
+                        <button
+                            type="button"
+                            className={
+                                scopeFilter === SCOPE_FILTERS.MINE
+                                    ? "filter-button active"
+                                    : "filter-button"
+                            }
+                            onClick={() => setScopeFilter(SCOPE_FILTERS.MINE)}
+                        >
+                            Mine
+                        </button>
+                        <button
+                            type="button"
+                            className={
+                                scopeFilter === SCOPE_FILTERS.GLOBAL
+                                    ? "filter-button active"
+                                    : "filter-button"
+                            }
+                            onClick={() => setScopeFilter(SCOPE_FILTERS.GLOBAL)}
                         >
                             Global (Sioux)
                         </button>
-                    )}
+                    </div>
+                )}
+
+                <div className="notification-filters">
+                    <button
+                        type="button"
+                        className={
+                            typeFilter === TYPE_FILTERS.ALL
+                                ? "filter-button active"
+                                : "filter-button"
+                        }
+                        onClick={() => setTypeFilter(TYPE_FILTERS.ALL)}
+                    >
+                        All
+                    </button>
+                    <button
+                        type="button"
+                        className={
+                            typeFilter === TYPE_FILTERS.INFO
+                                ? "filter-button active"
+                                : "filter-button"
+                        }
+                        onClick={() => setTypeFilter(TYPE_FILTERS.INFO)}
+                    >
+                        Info
+                    </button>
+                    <button
+                        type="button"
+                        className={
+                            typeFilter === TYPE_FILTERS.SUCCESS
+                                ? "filter-button active"
+                                : "filter-button"
+                        }
+                        onClick={() => setTypeFilter(TYPE_FILTERS.SUCCESS)}
+                    >
+                        Success
+                    </button>
+                    <button
+                        type="button"
+                        className={
+                            typeFilter === TYPE_FILTERS.WARNING
+                                ? "filter-button active"
+                                : "filter-button"
+                        }
+                        onClick={() => setTypeFilter(TYPE_FILTERS.WARNING)}
+                    >
+                        Warning
+                    </button>
                 </div>
 
-                {effectiveTab === TABS.GLOBAL && globalError && (
-                    <div className="notifications-error">
-                        Could not load global feed: {globalError}
+                {globalError && (
+                    <div className="empty-state" style={{ marginBottom: 16 }}>
+                        <h3>Could not load global feed</h3>
+                        <p>{globalError}</p>
                     </div>
                 )}
 
-                {effectiveTab === TABS.GLOBAL && loadingGlobal && (
-                    <div className="notifications-empty">Loading...</div>
+                {globalLoading && (
+                    <div className="empty-state" style={{ marginBottom: 16 }}>
+                        <p>Loading global feed...</p>
+                    </div>
                 )}
 
-                {visible.length === 0 ? (
-                    <div className="notifications-empty">
-                        {effectiveTab === TABS.GLOBAL
-                            ? "No company-addressed packages right now."
-                            : "You have no notifications yet."}
-                    </div>
-                ) : (
-                    <div className="notifications-list">
-                        {visible.map((n) => (
-                            <NotificationRow
-                                key={n.id}
-                                notification={n}
-                                onSelect={handleSelect}
-                            />
-                        ))}
-                    </div>
-                )}
+                <div className="notification-history-list">
+                    {filtered.length === 0 ? (
+                        <div className="empty-state">
+                            <h3>No notifications found</h3>
+                            <p>There are no notifications for this filter yet.</p>
+                        </div>
+                    ) : (
+                        filtered.map((n) => {
+                            const cat = categoryFor(n);
+                            const cardClass = `notification-history-card ${cat}${n.read ? "" : " unread"}`;
+                            return (
+                                <div
+                                    key={`${n.scope || "P"}-${n.id}`}
+                                    className={cardClass}
+                                    onClick={() => handleSelect(n)}
+                                    style={{
+                                        cursor: n.read ? "default" : "pointer",
+                                        opacity: n.read ? 0.78 : 1
+                                    }}
+                                >
+                                    <div className="notification-accent"></div>
+
+                                    <div className="notification-card-content">
+                                        <div className="notification-history-card-top">
+                                            <div className="notification-title-group">
+                                                <h3>{n.title}</h3>
+                                                <span className={`notification-badge ${cat}`}>
+                                                    {n.scope === "GLOBAL" ? "global" : cat}
+                                                </span>
+                                            </div>
+
+                                            <div className="notification-date-group">
+                                                <span className="notification-date">
+                                                    {formatDate(n.createdAt)}
+                                                </span>
+                                                <span className="notification-time">
+                                                    {formatTime(n.createdAt)}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <p>{n.message}</p>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
             </main>
         </div>
     );
