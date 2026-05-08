@@ -52,7 +52,7 @@ const formatTime = (value) => {
     }).format(date);
 };
 
-const Notifications = ({ currentRole, setCurrentRole }) => {
+const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const { notifications, refresh, markRead, userId } = useNotification();
 
     const [scopeFilter, setScopeFilter] = useState(SCOPE_FILTERS.ALL);
@@ -156,7 +156,7 @@ const Notifications = ({ currentRole, setCurrentRole }) => {
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} />
+            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
 
             <main className="notification-history-page">
                 <div className="notification-history-header">
@@ -313,18 +313,4 @@ const Notifications = ({ currentRole, setCurrentRole }) => {
                                                     {formatTime(n.createdAt)}
                                                 </span>
                                             </div>
-                                        </div>
-
-                                        <p>{n.message}</p>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    )}
-                </div>
-            </main>
-        </div>
-    );
-};
-
-export default Notifications;
+                     

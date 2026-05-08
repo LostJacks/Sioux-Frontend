@@ -8,7 +8,7 @@ import EmployeeQrModal from "../components/EmployeeQrModal";
 
 const API_BASE = "http://localhost:8080/api";
 
-const Dashboard = ({ currentRole, setCurrentRole }) => {
+const Dashboard = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [showQrModal, setShowQrModal] = useState(false);
     const [employees, setEmployees] = useState([]);
@@ -46,7 +46,7 @@ const Dashboard = ({ currentRole, setCurrentRole }) => {
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} />
+            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
 
             <main className="main-content">
                 <div className="top-bar">

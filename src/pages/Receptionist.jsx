@@ -37,7 +37,7 @@ const isPickedUp = (status) => status?.toUpperCase() === "PICKED_UP";
 
 const isIncoming = (status) => !isStored(status) && !isPickedUp(status);
 
-const Receptionist = ({ currentRole, setCurrentRole }) => {
+const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const [apiOrders, setApiOrders] = useState([]);
     const [displayOrders, setDisplayOrders] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -133,7 +133,7 @@ const Receptionist = ({ currentRole, setCurrentRole }) => {
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} />
+            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
 
             <main className="main-content">
                 <ReceptionistTopBar

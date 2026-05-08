@@ -1,9 +1,10 @@
-﻿import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import siouxLogo from "../assets/sioux-logo.jpg";
 import { useNotification } from "../hooks/useNotification";
 
-const Sidebar = ({ currentRole, setCurrentRole }) => {
+const Sidebar = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const { unreadCount } = useNotification() || {};
+    const navigate = useNavigate();
 
     const allowedRoles = {
         employee: [
@@ -23,6 +24,13 @@ const Sidebar = ({ currentRole, setCurrentRole }) => {
     };
 
     const visibleRoles = allowedRoles[currentRole] || allowedRoles.employee;
+
+    const handleSignOut = () => {
+        if (typeof setCurrentUser === "function") {
+            setCurrentUser(null);
+        }
+        navigate("/login");
+    };
 
     return (
         <aside className="sidebar">
@@ -73,7 +81,9 @@ const Sidebar = ({ currentRole, setCurrentRole }) => {
                 <p className="current-role">
                     {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
                 </p>
-                <button className="sign-out-button">Sign out</button>
+                <button className="sign-out-button" onClick={handleSignOut}>
+                    Sign out
+                </button>
             </div>
         </aside>
     );

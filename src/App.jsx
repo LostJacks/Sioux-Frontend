@@ -1,52 +1,123 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import Receptionist from "./pages/Receptionist";
 import Manager from "./pages/Manager";
 import Notifications from "./pages/Notifications";
+import LoginPage from "./pages/LoginPage";
 import { NotificationProvider } from "./context/NotificationContext";
 
+const STORAGE_KEY = "spms.currentUser";
+
+const readStoredUser = () => {
+    try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed.id !== "number") return null;
+        return parsed;
+    } catch {
+        return null;
+    }
+};
+
+const Protected = ({ user, children }) =>
+    user ? children : <Navigate to="/login" replace />;
+
 const App = () => {
-    const [currentRole, setCurrentRole] = useState("receptionist");
+    const stored = readStoredUser();
+
+    const [currentUser, setCurrentUserState] = useState(stored);
+    const [currentRole, setCurrentRole] = useState(
+        stored?.role === "admin" ? "manager" : (stored?.role || "employee")
+    );
+
+    // Persist to localStorage so reloads keep the session.
+    useEffect(() => {
+        if (currentUser) {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+        } else {
+            window.localStorage.removeItem(STORAGE_KEY);
+        }
+    }, [currentUser]);
+
+    const setCurrentUser = (u) => setCurrentUserState(u);
+
+    const userId = currentUser?.id ?? 1;
 
     return (
-        <NotificationProvider>
+        <NotificationProvider userId={userId}>
             <Routes>
-                <Route path="/" element={<Navigate to="/employee" replace />} />
+                <Route
+                    path="/login"
+                    element={
+                        <LoginPage
+                            setCurrentRole={setCurrentRole}
+                            setCurrentUser={setCurrentUser}
+                        />
+                    }
+                />
+
+                <Route
+                    path="/"
+                    element={
+                        currentUser ? (
+                            <Navigate to="/employee" replace />
+                        ) : (
+                            <Navigate to="/login" replace />
+                        )
+                    }
+                />
+
                 <Route
                     path="/employee"
                     element={
-                        <Dashboard
-                            currentRole={currentRole}
-                            setCurrentRole={setCurrentRole}
-                        />
+                        <Protected user={currentUser}>
+                            <Dashboard
+                                currentRole={currentRole}
+                                setCurrentRole={setCurrentRole}
+                                setCurrentUser={setCurrentUser}
+                            />
+                        </Protected>
                     }
                 />
+
                 <Route
                     path="/receptionist"
                     element={
-                        <Receptionist
-                            currentRole={currentRole}
-                            setCurrentRole={setCurrentRole}
-                        />
+                        <Protected user={currentUser}>
+                            <Receptionist
+                                currentRole={currentRole}
+                                setCurrentRole={setCurrentRole}
+                                setCurrentUser={setCurrentUser}
+                            />
+                        </Protected>
                     }
                 />
+
                 <Route
                     path="/manager"
                     element={
-                        <Manager
-                            currentRole={currentRole}
-                            setCurrentRole={setCurrentRole}
-                        />
+                        <Protected user={currentUser}>
+                            <Manager
+                                currentRole={currentRole}
+                                setCurrentRole={setCurrentRole}
+                                setCurrentUser={setCurrentUser}
+                            />
+                        </Protected>
                     }
                 />
+
                 <Route
                     path="/notifications"
                     element={
-                        <Notifications
-                            currentRole={currentRole}
-                            setCurrentRole={setCurrentRole}
-                        />
+                        <Protected user={currentUser}>
+                            <Notifications
+                                currentRole={currentRole}
+                                setCurrentRole={setCurrentRole}
+                                setCurrentUser={setCurrentUser}
+                            />
+                        </Protected>
                     }
                 />
             </Routes>
