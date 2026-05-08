@@ -22,8 +22,13 @@ const EmployeeQrModal = ({ employeeId, onClose }) => {
             });
     }, [employeeId]);
 
+    // Format: SPMS:EMP:{id}:{fullName}
+    // Security note: this value is not signed. Forgery is mitigated by physical
+    // access control — only real employees possess a device showing the QR.
+    // If stricter guarantees are needed, replace the id+name payload with a
+    // server-issued, short-lived HMAC token.
     const qrValue = employeeData
-        ? `${employeeData.employeeId} - ${employeeData.firstName} ${employeeData.lastName}`
+        ? `SPMS:EMP:${employeeData.employeeId}:${employeeData.firstName} ${employeeData.lastName}`
         : "";
 
     return (
