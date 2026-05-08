@@ -522,10 +522,8 @@ body {
     align-items: center;
     gap: 14px;
 }
-<<<<<<< Updated upstream
-=======
 
-/* US-03 — pickup confirmation styling (kept on top of Jack's restyle) */
+/* PICKUP */
 .pickup-button {
     margin-top: 8px;
     padding: 6px 14px;
@@ -538,9 +536,9 @@ body {
     font-weight: 600;
 }
 
-.pickup-button:hover {
-    background: #333;
-}
+    .pickup-button:hover {
+        background: #333;
+    }
 
 .picked-up-badge {
     display: inline-block;
@@ -572,7 +570,166 @@ body {
     font-weight: 600;
 }
 
-.reminder-button:hover {
-    background: #f3f3f3;
+    .reminder-button:hover {
+        background: #f3f3f3;
+    }
+
+/* STORE PACKAGE MODAL */
+.store-modal {
+    width: 440px;
+    max-height: 90vh;
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
->>>>>>> Stashed changes
+
+.store-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+    .store-modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .store-modal-body::-webkit-scrollbar-thumb {
+        background-color: #cdd4de;
+        border-radius: 999px;
+    }
+
+    .store-modal-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+.store-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.store-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.store-tracking {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111111;
+    background: #f5f7fb;
+    border: 1px solid #e4e8ef;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 0;
+}
+
+.store-autocomplete {
+    position: relative;
+}
+
+.store-input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #d9dfe7;
+    border-radius: 10px;
+    padding: 0 14px;
+    font-size: 14px;
+    color: #111111;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.2s;
+}
+
+    .store-input:focus {
+        border-color: #ff6b2c;
+    }
+
+.store-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #d9dfe7;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    z-index: 10;
+}
+
+.store-dropdown-item {
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #111111;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+    .store-dropdown-item:hover {
+        background: #fff4ef;
+        color: #ff6b2c;
+    }
+
+.store-select {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #d9dfe7;
+    border-radius: 10px;
+    padding: 0 14px;
+    font-size: 14px;
+    color: #111111;
+    outline: none;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: auto;
+}
+
+    .store-select:focus {
+        border-color: #ff6b2c;
+    }
+
+.store-error {
+    font-size: 13px;
+    color: #dc2626;
+    font-weight: 600;
+    margin: 0;
+}
+
+.store-submit {
+    width: 100%;
+    height: 46px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff6b2c, #ff8447);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 18px rgba(255, 107, 44, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 4px;
+}
+
+    .store-submit:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 22px rgba(255, 107, 44, 0.28);
+    }
+
+    .store-submit:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
