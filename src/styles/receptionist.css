@@ -674,3 +674,20 @@ body {
 .order-row--picked-up {
     opacity: 0.7;
 }
+
+.reminder-button {
+    margin-top: 6px;
+    margin-left: 8px;
+    padding: 6px 14px;
+    background: #fff;
+    color: #1f1f1f;
+    border: 1px solid #1f1f1f;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.reminder-button:hover {
+    background: #f3f3f3;
+}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import OrderRow from "./OrderRow";
 import NotifyManagersModal from "./NotifyManagersModal";
 import { useNotification } from "../hooks/useNotification";
+import { getPickupReminder } from "../services/orderApi";
 
 const ReceptionistPanel = ({ orders, onPickup }) => {
     const { showNotification } = useNotification() || {};
@@ -13,6 +14,18 @@ const ReceptionistPanel = ({ orders, onPickup }) => {
     const handleSent = (notification) => {
         if (notification && typeof showNotification === "function") {
             showNotification(notification);
+        }
+    };
+
+    const handleSendReminder = async (order) => {
+        if (!order?.pkgId) return;
+        try {
+            const data = await getPickupReminder(order.pkgId);
+            if (typeof showNotification === "function") {
+                showNotification(data);
+            }
+        } catch (err) {
+            console.error("Failed to send reminder:", err);
         }
     };
 
@@ -33,6 +46,7 @@ const ReceptionistPanel = ({ orders, onPickup }) => {
                                 order={order}
                                 onPickup={onPickup}
                                 onNotifyManagers={openNotifyModal}
+                                onSendReminder={handleSendReminder}
                             />
                         ))
                     ) : (
