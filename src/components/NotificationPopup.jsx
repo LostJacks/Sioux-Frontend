@@ -11,14 +11,14 @@ const NotificationPopup = ({ notification, onClose }) => {
             month: "short",
             year: "numeric",
             hour: "2-digit",
-            minute: "2-digit"
+            minute: "2-digit",
         }).format(date);
     };
 
     return (
         <div className="notification-popup">
             <button className="notification-close" onClick={onClose}>
-                ×
+                Ã—
             </button>
             <h3>{notification.title}</h3>
             <p>{notification.message}</p>

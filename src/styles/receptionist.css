@@ -463,3 +463,181 @@ body {
     align-items: center;
     gap: 14px;
 }
+
+.qr-hint {
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+    margin: 0;
+}
+
+/* SCAN BANNER */
+.scan-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 120px 0 120px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.scan-banner--employee {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.scan-banner--package {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}
+
+.scan-banner--error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.scan-banner-clear {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    color: inherit;
+    padding: 0;
+}
+
+/* STORE PACKAGE MODAL */
+.store-modal {
+    width: 420px;
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.store-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.store-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+}
+
+.store-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+}
+
+.store-tracking {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+    word-break: break-all;
+}
+
+.store-input,
+.store-select {
+    height: 40px;
+    border: 1px solid #bbb;
+    border-radius: 8px;
+    padding: 0 12px;
+    font-size: 14px;
+    outline: none;
+    background: #fafafa;
+    width: 100%;
+}
+
+.store-input:focus,
+.store-select:focus {
+    border-color: #ff6b2c;
+}
+
+.store-autocomplete {
+    position: relative;
+}
+
+.store-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    list-style: none;
+    margin: 2px 0 0;
+    padding: 4px 0;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.store-dropdown-item {
+    padding: 8px 14px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.store-dropdown-item:hover {
+    background: #f4cbbb;
+}
+
+.store-error {
+    font-size: 13px;
+    color: #c0392b;
+    margin: 0;
+}
+
+.store-submit {
+    height: 44px;
+    border: none;
+    border-radius: 10px;
+    background-color: #ff6b2c;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+}
+
+.store-submit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* PICKUP BUTTON & STATE */
+.pickup-button {
+    height: 28px;
+    padding: 0 12px;
+    border: 1px solid #1a7a3c;
+    border-radius: 6px;
+    background-color: #27ae60;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.picked-up-badge {
+    font-size: 12px;
+    font-weight: 700;
+    color: #27ae60;
+}
+
+.order-row--picked-up {
+    opacity: 0.6;
+}

@@ -3,7 +3,7 @@ import OrderRow from "./OrderRow";
 import NotifyManagersModal from "./NotifyManagersModal";
 import { useNotification } from "../hooks/useNotification";
 
-const ReceptionistPanel = ({ orders }) => {
+const ReceptionistPanel = ({ orders, onPickup }) => {
     const { showNotification } = useNotification() || {};
     const [notifyTarget, setNotifyTarget] = useState(null);
 
@@ -29,8 +29,9 @@ const ReceptionistPanel = ({ orders }) => {
                     {orders.length > 0 ? (
                         orders.map((order) => (
                             <OrderRow
-                                key={order.id}
+                                key={order.pkgId || order.id}
                                 order={order}
+                                onPickup={onPickup}
                                 onNotifyManagers={openNotifyModal}
                             />
                         ))
@@ -42,8 +43,8 @@ const ReceptionistPanel = ({ orders }) => {
 
             {notifyTarget && (
                 <NotifyManagersModal
-                    orderId={notifyTarget.id}
-                    trackingNumber={notifyTarget.id}
+                    orderId={notifyTarget.pkgId || notifyTarget.id}
+                    trackingNumber={notifyTarget.trackingNumber || notifyTarget.id}
                     onClose={closeNotifyModal}
                     onSent={handleSent}
                 />
