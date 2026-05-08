@@ -19,8 +19,6 @@ const TYPE_FILTERS = {
 
 const INITIAL_GLOBAL_STATE = { status: "idle", list: [], error: null };
 
-// Map our backend NotificationType to Jack's visual category (info / success
-// / warning) so we can reuse his card accent + badge styling.
 const TYPE_CATEGORY = {
     ORDER_ARRIVED: "info",
     PICKUP_REMINDER: "warning",
@@ -61,19 +59,20 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
     const isManager = currentRole === "manager";
 
-    // Personal feed comes from context. Global is fetched separately so we
-    // can show it inside the same list when the manager picks the Global
-    // (or All) scope filter.
+    const effectiveScope =
+        !isManager && scopeFilter === SCOPE_FILTERS.GLOBAL
+            ? SCOPE_FILTERS.ALL
+            : scopeFilter;
+
     useEffect(() => {
         refresh();
     }, [refresh]);
 
     useEffect(() => {
         if (!isManager) return undefined;
-        if (scopeFilter !== SCOPE_FILTERS.GLOBAL && scopeFilter !== SCOPE_FILTERS.ALL) {
+        if (effectiveScope !== SCOPE_FILTERS.GLOBAL && effectiveScope !== SCOPE_FILTERS.ALL) {
             return undefined;
         }
-
         let cancelled = false;
         listGlobalForManager(userId)
             .then((list) => {
@@ -92,14 +91,11 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                     error: err.message || "Failed to load"
                 });
             });
-
         return () => {
             cancelled = true;
         };
-    }, [scopeFilter, isManager, userId]);
+    }, [effectiveScope, isManager, userId]);
 
-    // Build the merged list based on the active scope filter. Global rows are
-    // tagged so we can de-dupe against personal copies of the same row.
     const personalList = useMemo(
         () => (Array.isArray(notifications) ? notifications : []),
         [notifications]
@@ -107,15 +103,12 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
     const merged = useMemo(() => {
         if (!isManager) return personalList;
-
-        if (scopeFilter === SCOPE_FILTERS.MINE) {
+        if (effectiveScope === SCOPE_FILTERS.MINE) {
             return personalList.filter((n) => n.scope !== "GLOBAL");
         }
-        if (scopeFilter === SCOPE_FILTERS.GLOBAL) {
+        if (effectiveScope === SCOPE_FILTERS.GLOBAL) {
             return globalState.list;
         }
-
-        // All — combine both, de-duped on id, newest first.
         const seen = new Set();
         const combined = [];
         for (const n of [...personalList, ...globalState.list]) {
@@ -129,7 +122,7 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
             return tb - ta;
         });
         return combined;
-    }, [isManager, scopeFilter, personalList, globalState.list]);
+    }, [isManager, effectiveScope, personalList, globalState.list]);
 
     const filtered = useMemo(() => {
         if (typeFilter === TYPE_FILTERS.ALL) return merged;
@@ -141,12 +134,6 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         markRead(n.id);
     };
 
-    const globalLoading =
-        isManager &&
-        (scopeFilter === SCOPE_FILTERS.GLOBAL || scopeFilter === SCOPE_FILTERS.ALL) &&
-        globalState.status === "idle";
-    const globalError = globalState.error;
-
     const eyebrow =
         currentRole === "manager"
             ? "Manager portal"
@@ -156,7 +143,11 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
+            <Sidebar
+                currentRole={currentRole}
+                setCurrentRole={setCurrentRole}
+                setCurrentUser={setCurrentUser}
+            />
 
             <main className="notification-history-page">
                 <div className="notification-history-header">
@@ -164,9 +155,8 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                         <p className="notification-history-eyebrow">{eyebrow}</p>
                         <h1>Notification history</h1>
                         <p className="notification-history-subtitle">
-                            All notifications addressed to you, sorted from
-                            newest to oldest. Click an unread row to mark it
-                            as read.
+                            All notifications addressed to you, sorted from newest to oldest.
+                            Click an unread row to mark it as read.
                         </p>
                     </div>
 
@@ -180,34 +170,25 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                     <div className="notification-filters">
                         <button
                             type="button"
-                            className={
-                                scopeFilter === SCOPE_FILTERS.ALL
-                                    ? "filter-button active"
-                                    : "filter-button"
-                            }
+                            className={effectiveScope === SCOPE_FILTERS.ALL ? "filter-button active" : "filter-button"}
                             onClick={() => setScopeFilter(SCOPE_FILTERS.ALL)}
                         >
                             Everything
                         </button>
                         <button
                             type="button"
-                            className={
-                                scopeFilter === SCOPE_FILTERS.MINE
-                                    ? "filter-button active"
-                                    : "filter-button"
-                            }
+                            className={effectiveScope === SCOPE_FILTERS.MINE ? "filter-button active" : "filter-button"}
                             onClick={() => setScopeFilter(SCOPE_FILTERS.MINE)}
                         >
                             Mine
                         </button>
                         <button
                             type="button"
-                            className={
-                                scopeFilter === SCOPE_FILTERS.GLOBAL
-                                    ? "filter-button active"
-                                    : "filter-button"
-                            }
-                            onClick={() => setScopeFilter(SCOPE_FILTERS.GLOBAL)}
+                            className={effectiveScope === SCOPE_FILTERS.GLOBAL ? "filter-button active" : "filter-button"}
+                            onClick={() => {
+                                setScopeFilter(SCOPE_FILTERS.GLOBAL);
+                                setGlobalState(INITIAL_GLOBAL_STATE);
+                            }}
                         >
                             Global (Sioux)
                         </button>
@@ -217,60 +198,38 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                 <div className="notification-filters">
                     <button
                         type="button"
-                        className={
-                            typeFilter === TYPE_FILTERS.ALL
-                                ? "filter-button active"
-                                : "filter-button"
-                        }
+                        className={typeFilter === TYPE_FILTERS.ALL ? "filter-button active" : "filter-button"}
                         onClick={() => setTypeFilter(TYPE_FILTERS.ALL)}
                     >
                         All
                     </button>
                     <button
                         type="button"
-                        className={
-                            typeFilter === TYPE_FILTERS.INFO
-                                ? "filter-button active"
-                                : "filter-button"
-                        }
+                        className={typeFilter === TYPE_FILTERS.INFO ? "filter-button active" : "filter-button"}
                         onClick={() => setTypeFilter(TYPE_FILTERS.INFO)}
                     >
                         Info
                     </button>
                     <button
                         type="button"
-                        className={
-                            typeFilter === TYPE_FILTERS.SUCCESS
-                                ? "filter-button active"
-                                : "filter-button"
-                        }
+                        className={typeFilter === TYPE_FILTERS.SUCCESS ? "filter-button active" : "filter-button"}
                         onClick={() => setTypeFilter(TYPE_FILTERS.SUCCESS)}
                     >
                         Success
                     </button>
                     <button
                         type="button"
-                        className={
-                            typeFilter === TYPE_FILTERS.WARNING
-                                ? "filter-button active"
-                                : "filter-button"
-                        }
+                        className={typeFilter === TYPE_FILTERS.WARNING ? "filter-button active" : "filter-button"}
                         onClick={() => setTypeFilter(TYPE_FILTERS.WARNING)}
                     >
                         Warning
                     </button>
                 </div>
 
-                {globalError && (
+                {globalState.error && effectiveScope !== SCOPE_FILTERS.MINE && (
                     <div className="empty-state" style={{ marginBottom: 16 }}>
                         <h3>Could not load global feed</h3>
-                        <p>{globalError}</p>
-                    </div>
-                )}
-
-                {globalLoading && (
-                    <div className="empty-state" style={{ marginBottom: 16 }}>
-                        <p>Loading global feed...</p>
+                        <p>{globalState.error}</p>
                     </div>
                 )}
 
@@ -306,11 +265,21 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                                             </div>
 
                                             <div className="notification-date-group">
-                                                <span className="notification-date">
-                                                    {formatDate(n.createdAt)}
-                                                </span>
-                                                <span className="notification-time">
-                                                    {formatTime(n.createdAt)}
-                                                </span>
+                                                <span className="notification-date">{formatDate(n.createdAt)}</span>
+                                                <span className="notification-time">{formatTime(n.createdAt)}</span>
                                             </div>
-                     
+                                        </div>
+
+                                        <p>{n.message}</p>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            </main>
+        </div>
+    );
+};
+
+export default Notifications;

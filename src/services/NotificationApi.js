@@ -1,8 +1,4 @@
 // Notification REST helpers (US-03).
-//
-// All endpoints live under /api/notifications on the Spring backend.
-// `notifyArrival` posts the optional { targetUserIds } body the
-// receptionist's manager picker provides.
 
 const API_BASE = "http://localhost:8080";
 
@@ -56,14 +52,6 @@ export async function markAsRead(notificationId) {
     return await response.json();
 }
 
-/**
- * Trigger an arrival notification for an order/package.
- *
- * @param {number} orderId
- * @param {number[] | null | undefined} targetUserIds  optional manager
- *        subset for Sioux/unaddressed packages. Omit / null / [] means
- *        "fan out to every manager".
- */
 export async function notifyArrival(orderId, targetUserIds) {
     const body =
         Array.isArray(targetUserIds) && targetUserIds.length > 0

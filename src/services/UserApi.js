@@ -1,5 +1,5 @@
 // User lookup helpers. Used by US-03 to populate the receptionist's
-// manager-picker modal.
+// manager-picker modal and the LoginPage email-based sign-in.
 
 const API_BASE = "http://localhost:8080";
 
