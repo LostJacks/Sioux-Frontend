@@ -1,22 +1,36 @@
-﻿import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import siouxLogo from "../assets/sioux-logo.jpg";
+import { useNotification } from "../hooks/useNotification";
 
-const Sidebar = ({ currentRole, setCurrentRole }) => {
+const Sidebar = ({ currentRole, setCurrentRole, setCurrentUser }) => {
+    const { unreadCount } = useNotification() || {};
+    const navigate = useNavigate();
+
     const allowedRoles = {
         employee: [
-            { label: "Employee", path: "/employee" }
+            { label: "Employee", path: "/employee" },
+            { label: "Notifications", path: "/notifications" }
         ],
         manager: [
             { label: "Employee", path: "/employee" },
-            { label: "Manager", path: "/manager" }
+            { label: "Manager", path: "/manager" },
+            { label: "Notifications", path: "/notifications" }
         ],
         receptionist: [
             { label: "Employee", path: "/employee" },
-            { label: "Receptionist", path: "/receptionist" }
+            { label: "Receptionist", path: "/receptionist" },
+            { label: "Notifications", path: "/notifications" }
         ]
     };
 
     const visibleRoles = allowedRoles[currentRole] || allowedRoles.employee;
+
+    const handleSignOut = () => {
+        if (typeof setCurrentUser === "function") {
+            setCurrentUser(null);
+        }
+        navigate("/login");
+    };
 
     return (
         <aside className="sidebar">
@@ -32,17 +46,34 @@ const Sidebar = ({ currentRole, setCurrentRole }) => {
                 <div className="roles-section">
                     <h2 className="roles-title">Roles</h2>
 
-                    {visibleRoles.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            className={({ isActive }) =>
-                                isActive ? "role-button active-role" : "role-button"
-                            }
-                        >
-                            {item.label}
-                        </NavLink>
-                    ))}
+                    {visibleRoles.map((item) => {
+                        const isNotifLink = item.path === "/notifications";
+                        return (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    isActive ? "role-button active-role" : "role-button"
+                                }
+                            >
+                                {item.label}
+                                {isNotifLink && unreadCount > 0 && (
+                                    <span
+                                        style={{
+                                            marginLeft: 8,
+                                            background: "#d12222",
+                                            color: "#fff",
+                                            borderRadius: "10px",
+                                            padding: "2px 8px",
+                                            fontSize: 12
+                                        }}
+                                    >
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </NavLink>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -50,7 +81,9 @@ const Sidebar = ({ currentRole, setCurrentRole }) => {
                 <p className="current-role">
                     {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
                 </p>
-                <button className="sign-out-button">Sign out</button>
+                <button className="sign-out-button" onClick={handleSignOut}>
+                    Sign out
+                </button>
             </div>
         </aside>
     );

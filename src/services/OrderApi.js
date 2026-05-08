@@ -1,55 +1,31 @@
-const BASE_URL = "http://localhost:8080/api/orders";
+// Order REST helpers — wraps the legacy /api/orders/{id}/arrival-notification
+// and /reminder-notification endpoints used by the receptionist's
+// "Send reminder" button and any backend-arrival hooks.
 
-export async function getAllOrders() {
-    const response = await fetch(BASE_URL);
-    if (!response.ok) {
-        throw new Error("Failed to fetch orders");
-    }
-    return await response.json();
-}
-
-export async function getOrdersForEmployee(employeeId) {
-    const response = await fetch(`${BASE_URL}/employee/${employeeId}`);
-    if (!response.ok) {
-        throw new Error("Failed to fetch employee orders");
-    }
-    return await response.json();
-}
-
-export async function getOrderByTrackingNumber(trackingNumber) {
-    const response = await fetch(`${BASE_URL}/tracking/${trackingNumber}`);
-    if (!response.ok) {
-        throw new Error("Failed to fetch order");
-    }
-    return await response.json();
-}
+const API_BASE = "http://localhost:8080";
 
 export async function getArrivalNotification(orderId) {
-    const response = await fetch(`${BASE_URL}/${orderId}/arrival-notification`, {
-        method: "POST"
-    });
+    const response = await fetch(
+        `${API_BASE}/api/orders/${orderId}/arrival-notification`,
+        { method: "POST" }
+    );
+
     if (!response.ok) {
-        throw new Error("Failed to fetch arrival notification");
+        throw new Error(`Failed to fetch arrival notification (${response.status})`);
     }
+
     return await response.json();
 }
 
 export async function getPickupReminder(orderId) {
-    const response = await fetch(`${BASE_URL}/${orderId}/reminder-notification`, {
-        method: "POST"
-    });
-    if (!response.ok) {
-        throw new Error("Failed to fetch pickup reminder");
-    }
-    return await response.json();
-}
+    const response = await fetch(
+        `${API_BASE}/api/orders/${orderId}/reminder-notification`,
+        { method: "POST" }
+    );
 
-export async function markOrderAsPickedUp(orderId) {
-    const response = await fetch(`${BASE_URL}/${orderId}/pickup`, {
-        method: "PUT"
-    });
     if (!response.ok) {
-        throw new Error("Failed to mark order as picked up");
+        throw new Error(`Failed to fetch pickup reminder (${response.status})`);
     }
+
     return await response.json();
 }

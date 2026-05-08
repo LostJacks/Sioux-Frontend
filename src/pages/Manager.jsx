@@ -16,7 +16,7 @@ const mapApiBuilding = (b) => ({
     })),
 });
 
-const Manager = ({ currentRole, setCurrentRole }) => {
+const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const [buildingSearch, setBuildingSearch] = useState("");
     const [showScanEmployeeQrModal, setShowScanEmployeeQrModal] = useState(false);
     const [buildings, setBuildings] = useState([]);
@@ -128,7 +128,7 @@ const Manager = ({ currentRole, setCurrentRole }) => {
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} />
+            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
 
             <main className="manager-content">
                 <div className="manager-top-row">

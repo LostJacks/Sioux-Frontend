@@ -1,7 +1,8 @@
-const OrderRow = ({ order, onPickup }) => {
+const OrderRow = ({ order, onPickup, onNotifyManagers, onSendReminder }) => {
     const trackingId = order.id || order.trackingNumber;
     const statusText = (typeof order.status === "object" ? order.status?.name : order.status) || "UNKNOWN";
     const isPickedUp = statusText?.toUpperCase() === "PICKED_UP" || order.pickedUp === true;
+    const isStored = statusText?.toUpperCase() === "STORED";
     const locationText = order.location || order.buildingName || order.employee?.building || "";
 
     const handleTrack = () => {
@@ -39,6 +40,22 @@ const OrderRow = ({ order, onPickup }) => {
                         Courier website
                     </button>
                 )}
+
+                {/* Notify managers only for Sioux/unaddressed parcels (no employee).
+                    Personal packages already trigger an arrival notification on
+                    storePackage, so escalating to managers would just be noise. */}
+                {typeof onNotifyManagers === "function" &&
+                    order.pkgId &&
+                    !order.employee && (
+                        <button
+                            type="button"
+                            className="courier-button"
+                            style={{ marginTop: 6 }}
+                            onClick={() => onNotifyManagers(order)}
+                        >
+                            Notify managers
+                        </button>
+                    )}
             </div>
 
             <div className="order-middle">
@@ -72,14 +89,27 @@ const OrderRow = ({ order, onPickup }) => {
                 {isPickedUp ? (
                     <span className="picked-up-badge">Picked up</span>
                 ) : (
-                    onPickup && order.pkgId && (
-                        <button
-                            className="pickup-button"
-                            onClick={() => onPickup(order.pkgId)}
-                        >
-                            Mark as Picked Up
-                        </button>
-                    )
+                    <>
+                        {onPickup && order.pkgId && (
+                            <button
+                                className="pickup-button"
+                                onClick={() => onPickup(order.pkgId)}
+                            >
+                                Mark as Picked Up
+                            </button>
+                        )}
+                        {/* Send reminder is offered once the package is on a shelf
+                            waiting for the employee — a real workflow trigger so we
+                            don't need a "Test reminder" button anywhere. */}
+                        {onSendReminder && order.pkgId && isStored && (
+                            <button
+                                className="reminder-button"
+                                onClick={() => onSendReminder(order)}
+                            >
+                                Send reminder
+                            </button>
+                        )}
+                    </>
                 )}
             </div>
         </div>
