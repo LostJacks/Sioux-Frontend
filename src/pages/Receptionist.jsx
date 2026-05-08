@@ -1,73 +1,134 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/receptionist.css";
 import Sidebar from "../components/Sidebar";
 import ReceptionistTopBar from "../components/ReceptionistTopBar";
 import PackageTabs from "../components/PackageTabs";
 import ReceptionistPanel from "../components/ReceptionistPanel";
 import ScanQrModal from "../components/ScanQrModal";
-import { getAllOrders, getOrdersForEmployee, getOrderByTrackingNumber } from "../services/orderApi";
+import StorePackageModal from "../components/StorePackageModal";
+import { orders as mockOrders } from "../data/orders";
+
+const API_BASE = "http://localhost:8080/api";
+
+const mapOrder = (o) => ({
+    pkgId: o.id,
+    id: o.trackingNumber || String(o.id),
+    courier: o.courier || "",
+    status: o.pickedUp ? "PICKED_UP" : (o.status?.name || o.status || "REGISTERED"),
+    location: o.rowLocation || o.buildingName || o.location || "",
+    employee: o.employee,
+});
+
+const normalisedMockOrders = mockOrders.map((o) => ({
+    pkgId: null,
+    id: o.id,
+    courier: o.courier,
+    status: o.status,
+    location: o.location || "",
+    employee: null,
+}));
+
+const isStored = (status) => {
+    const s = status?.toUpperCase();
+    return s === "STORED" || s === "READY" || s === "READY_FOR_PICKUP";
+};
+
+const isPickedUp = (status) => status?.toUpperCase() === "PICKED_UP";
+
+const isIncoming = (status) => !isStored(status) && !isPickedUp(status);
 
 const Receptionist = ({ currentRole, setCurrentRole }) => {
+    const [apiOrders, setApiOrders] = useState([]);
+    const [displayOrders, setDisplayOrders] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeTab, setActiveTab] = useState("all");
     const [scanType, setScanType] = useState(null);
-    const [orders, setOrders] = useState([]);
+    const [scanBanner, setScanBanner] = useState(null);
+    const [scannedPackage, setScannedPackage] = useState(null);
 
-    const loadOrders = () => {
-        getAllOrders()
-            .then(setOrders)
-            .catch((err) => console.error(err));
-    };
+    const mergeWithMock = (apiList) => [...apiList, ...normalisedMockOrders];
 
     useEffect(() => {
-        loadOrders();
+        fetch(`${API_BASE}/orders`)
+            .then((res) => res.json())
+            .then((data) => {
+                const mapped = data.map(mapOrder);
+                setApiOrders(mapped);
+                setDisplayOrders(mergeWithMock(mapped));
+            })
+            .catch(() => {
+                setDisplayOrders(normalisedMockOrders);
+            });
     }, []);
 
-    const filteredOrders = orders.filter((order) => {
-        const tracking = (order.trackingNumber || "").toLowerCase();
-        const matchesSearch = tracking.includes(searchTerm.toLowerCase());
-
-        const status = order.status?.name || "";
-        const pickedUp = order.pickedUp === true;
-
-        if (activeTab === "incoming") {
-            return matchesSearch && !pickedUp && status !== "READY_FOR_PICKUP";
-        }
-
-        if (activeTab === "stored") {
-            return matchesSearch && !pickedUp && status === "READY_FOR_PICKUP";
-        }
-
+    const filteredOrders = displayOrders.filter((order) => {
+        const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase());
+        if (activeTab === "incoming") return matchesSearch && isIncoming(order.status);
+        if (activeTab === "stored") return matchesSearch && isStored(order.status);
         return matchesSearch;
     });
 
-    const handleEmployeeScan = async (employeeId) => {
-        try {
-            const data = await getOrdersForEmployee(employeeId);
-            setOrders(data);
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    const handleEmployeeScan = async (scannedValue) => {
+        const spmsMatch = scannedValue.match(/^SPMS:EMP:(\d+):(.+)$/);
+        const legacyMatch = scannedValue.match(/^(\d+)\s*-\s*(.+)$/);
+        const match = spmsMatch || legacyMatch;
 
-    const handlePackageScan = async (trackingNumber) => {
+        if (!match) {
+            setScanBanner({ type: "error", message: "Invalid employee QR code" });
+            return;
+        }
+
+        const employeeId = match[1];
+        const employeeName = match[2];
+
         try {
-            const data = await getOrderByTrackingNumber(trackingNumber);
-            setOrders(data ? [data] : []);
-            setSearchTerm(trackingNumber);
-        } catch (error) {
-            console.error(error);
+            const res = await fetch(`${API_BASE}/orders/employee/${employeeId}`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            setDisplayOrders(data.map(mapOrder));
+            setScanBanner({ type: "employee", message: `Packages for ${employeeName}` });
+        } catch {
+            setScanBanner({ type: "error", message: "Employee not found" });
         }
     };
 
     const handleScan = async (scannedValue) => {
-        if (scanType === "employee") {
-            await handleEmployeeScan(scannedValue);
-        }
-        if (scanType === "package") {
-            await handlePackageScan(scannedValue);
-        }
+        if (scanType === "employee") await handleEmployeeScan(scannedValue);
+        if (scanType === "package") setScannedPackage(scannedValue);
         setScanType(null);
+    };
+
+    const handleStored = (storedOrder) => {
+        const mapped = mapOrder(storedOrder);
+        setApiOrders((prev) => {
+            const exists = prev.find((o) => o.pkgId === mapped.pkgId);
+            return exists ? prev.map((o) => (o.pkgId === mapped.pkgId ? mapped : o)) : [...prev, mapped];
+        });
+        setDisplayOrders((prev) => {
+            const exists = prev.find((o) => o.pkgId === mapped.pkgId);
+            return exists ? prev.map((o) => (o.pkgId === mapped.pkgId ? mapped : o)) : [mapped, ...prev];
+        });
+        setScanBanner({ type: "package", message: `Package stored: ${mapped.id}` });
+    };
+
+    const handlePickup = async (pkgId) => {
+        if (!pkgId) return;
+        try {
+            const res = await fetch(`${API_BASE}/orders/${pkgId}/pickup`, { method: "PUT" });
+            if (!res.ok) throw new Error();
+            const updated = mapOrder(await res.json());
+            const updater = (prev) => prev.map((o) => (o.pkgId === pkgId ? updated : o));
+            setApiOrders(updater);
+            setDisplayOrders(updater);
+        } catch {
+            /* silently ignore */
+        }
+    };
+
+    const handleClearScan = () => {
+        setDisplayOrders(mergeWithMock(apiOrders));
+        setScanBanner(null);
+        setSearchTerm("");
     };
 
     return (
@@ -82,14 +143,32 @@ const Receptionist = ({ currentRole, setCurrentRole }) => {
                     onScanPackage={() => setScanType("package")}
                 />
 
+                {scanBanner && (
+                    <div className={`scan-banner scan-banner--${scanBanner.type}`}>
+                        <span>{scanBanner.message}</span>
+                        <button className="scan-banner-clear" onClick={handleClearScan}>
+                            Show all
+                        </button>
+                    </div>
+                )}
+
                 <PackageTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-                <ReceptionistPanel orders={filteredOrders} />
+
+                <ReceptionistPanel orders={filteredOrders} onPickup={handlePickup} />
 
                 {scanType && (
                     <ScanQrModal
-                        title={scanType === "employee" ? "Scan Employee QR" : "Scan Package"}
+                        title={scanType === "employee" ? "Scan Employee QR" : "Scan Package Barcode"}
                         onClose={() => setScanType(null)}
                         onScan={handleScan}
+                    />
+                )}
+
+                {scannedPackage && (
+                    <StorePackageModal
+                        trackingNumber={scannedPackage}
+                        onClose={() => setScannedPackage(null)}
+                        onStored={handleStored}
                     />
                 )}
             </main>

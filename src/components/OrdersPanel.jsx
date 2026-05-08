@@ -5,7 +5,7 @@ import { useNotification } from "../context/NotificationContext";
 const OrdersPanel = ({ orders }) => {
     const { showNotification } = useNotification();
 
-    const firstOrderId = orders.length > 0 ? orders[0].id : null;
+    const firstOrderId = orders.length > 0 ? (orders[0].pkgId ?? orders[0].id) : null;
 
     const handleArrivalNotification = async () => {
         if (!firstOrderId) return;
