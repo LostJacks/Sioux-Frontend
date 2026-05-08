@@ -43,8 +43,8 @@ const ReceptionistPanel = ({ orders, onPickup }) => {
 
             {notifyTarget && (
                 <NotifyManagersModal
-                    orderId={notifyTarget.pkgId || notifyTarget.id}
-                    trackingNumber={notifyTarget.trackingNumber || notifyTarget.id}
+                    orderId={notifyTarget.pkgId}
+                    trackingNumber={notifyTarget.id}
                     onClose={closeNotifyModal}
                     onSent={handleSent}
                 />

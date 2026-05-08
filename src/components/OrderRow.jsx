@@ -40,7 +40,9 @@ const OrderRow = ({ order, onPickup, onNotifyManagers }) => {
                     </button>
                 )}
 
-                {typeof onNotifyManagers === "function" && (
+                {/* Notify managers only on real backend rows (pkgId present), so the
+                    backend gets an integer id rather than a tracking string. */}
+                {typeof onNotifyManagers === "function" && order.pkgId && (
                     <button
                         type="button"
                         className="courier-button"
