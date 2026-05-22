@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import siouxLogo from "../assets/sioux-logo.jpg";
 import { useNotification } from "../hooks/useNotification";
 
-const Sidebar = ({ currentRole, setCurrentRole, setCurrentUser }) => {
+const Sidebar = ({ currentRole, setCurrentUser }) => {
     const { unreadCount } = useNotification() || {};
     const navigate = useNavigate();
 
@@ -37,26 +37,24 @@ const Sidebar = ({ currentRole, setCurrentRole, setCurrentUser }) => {
             <div className="sidebar-top">
                 <img src={siouxLogo} alt="Sioux Logo" className="logo" />
 
-                <div className="role-switch">
-                    <button onClick={() => setCurrentRole("employee")}>Employee</button>
-                    <button onClick={() => setCurrentRole("receptionist")}>Receptionist</button>
-                    <button onClick={() => setCurrentRole("manager")}>Manager</button>
-                </div>
-
                 <div className="roles-section">
                     <h2 className="roles-title">Roles</h2>
 
                     {visibleRoles.map((item) => {
                         const isNotifLink = item.path === "/notifications";
+
                         return (
                             <NavLink
                                 key={item.path}
                                 to={item.path}
                                 className={({ isActive }) =>
-                                    isActive ? "role-button active-role" : "role-button"
+                                    isActive
+                                        ? "role-button active-role"
+                                        : "role-button"
                                 }
                             >
                                 {item.label}
+
                                 {isNotifLink && unreadCount > 0 && (
                                     <span
                                         style={{
@@ -81,6 +79,7 @@ const Sidebar = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                 <p className="current-role">
                     {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
                 </p>
+
                 <button className="sign-out-button" onClick={handleSignOut}>
                     Sign out
                 </button>

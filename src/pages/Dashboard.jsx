@@ -8,36 +8,39 @@ import EmployeeQrModal from "../components/EmployeeQrModal";
 
 const API_BASE = "http://localhost:8080/api";
 
-const Dashboard = ({ currentRole, setCurrentRole, setCurrentUser }) => {
+const Dashboard = ({ currentRole, setCurrentUser, currentUser }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [showQrModal, setShowQrModal] = useState(false);
-    const [employees, setEmployees] = useState([]);
     const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
     const [orders, setOrders] = useState([]);
+    const [lastUpdate, setLastUpdate] = useState(null);
 
     useEffect(() => {
-        fetch(`${API_BASE}/qrcodes/employees`)
-            .then((r) => r.json())
-            .then((data) => {
-                setEmployees(data);
-                if (data.length > 0) setSelectedEmployeeId(String(data[0].employeeId));
-            })
-            .catch(() => {});
-    }, []);
+        if (currentUser?.id) {
+            setSelectedEmployeeId(String(currentUser.id));
+        }
+    }, [currentUser]);
 
     useEffect(() => {
         if (!selectedEmployeeId) return;
+
         fetch(`${API_BASE}/orders/employee/${selectedEmployeeId}`)
             .then((r) => r.json())
-            .then((data) => setOrders(data.map((o) => ({
-                pkgId: o.id,
-                id: o.trackingNumber || String(o.id),
-                courier: o.courier || "",
-                status: o.status?.name || o.status || "REGISTERED",
-                location: o.rowLocation || o.buildingName || "",
-                employee: o.employee,
-            }))))
-            .catch(() => {});
+            .then((data) => {
+                setOrders(
+                    data.map((o) => ({
+                        pkgId: o.id,
+                        id: o.trackingNumber || String(o.id),
+                        courier: o.courier || "",
+                        status: o.status?.name || o.status || "REGISTERED",
+                        location: o.rowLocation || o.buildingName || "",
+                        employee: o.employee
+                    }))
+                );
+
+                setLastUpdate(new Date());
+            })
+            .catch(() => { });
     }, [selectedEmployeeId]);
 
     const filteredOrders = orders.filter((o) =>
@@ -46,31 +49,27 @@ const Dashboard = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
+            <Sidebar
+                currentRole={currentRole}
+                setCurrentUser={setCurrentUser}
+            />
 
             <main className="main-content">
                 <div className="top-bar">
-                    <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                    <SearchBar
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                    />
 
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        {employees.length > 0 && (
-                            <select
-                                value={selectedEmployeeId}
-                                onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                                style={{ height: 40, borderRadius: 8, padding: "0 10px", border: "1px solid #ccc", fontSize: 14 }}
-                            >
-                                {employees.map((e) => (
-                                    <option key={e.employeeId} value={e.employeeId}>
-                                        {e.firstName} {e.lastName}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
                         <QrButton onClick={() => setShowQrModal(true)} />
                     </div>
                 </div>
 
-                <OrdersPanel orders={filteredOrders} />
+                <OrdersPanel
+                    orders={filteredOrders}
+                    lastUpdate={lastUpdate}
+                />
 
                 {showQrModal && selectedEmployeeId && (
                     <EmployeeQrModal

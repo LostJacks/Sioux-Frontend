@@ -75,7 +75,7 @@ const App = () => {
                         <Protected user={currentUser}>
                             <Dashboard
                                 currentRole={currentRole}
-                                setCurrentRole={setCurrentRole}
+                                currentUser={currentUser}
                                 setCurrentUser={setCurrentUser}
                             />
                         </Protected>
