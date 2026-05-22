@@ -40,7 +40,7 @@ function LoginPage({ setCurrentRole, setCurrentUser }) {
             const target = lower(email);
             const found = (Array.isArray(users) ? users : []).find(
                 (u) => lower(u.email) === target
-            );
+            );  
 
             if (!found) {
                 setError("No user with that email");
