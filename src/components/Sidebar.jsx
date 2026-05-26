@@ -13,7 +13,8 @@ const Sidebar = ({ currentRole, setCurrentUser }) => {
         ],
         manager: [
             { label: "Employee", path: "/employee" },
-            { label: "Manager", path: "/manager" },
+            { label: "Add building", path: "/buildings/add" },
+            { label: "Update building", path: "/buildings/update" },
             { label: "Notifications", path: "/notifications" }
         ],
         receptionist: [
@@ -38,7 +39,7 @@ const Sidebar = ({ currentRole, setCurrentUser }) => {
                 <img src={siouxLogo} alt="Sioux Logo" className="logo" />
 
                 <div className="roles-section">
-                    <h2 className="roles-title">Roles</h2>
+                    <h2 className="roles-title">Pages</h2>
 
                     {visibleRoles.map((item) => {
                         const isNotifLink = item.path === "/notifications";
@@ -76,9 +77,10 @@ const Sidebar = ({ currentRole, setCurrentUser }) => {
             </div>
 
             <div className="sidebar-bottom">
-                <p className="current-role">
+                <div className="current-role">
+                    <p>Signed in as:</p>
                     {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
-                </p>
+                </div>
 
                 <button className="sign-out-button" onClick={handleSignOut}>
                     Sign out

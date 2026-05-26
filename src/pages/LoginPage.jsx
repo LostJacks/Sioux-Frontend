@@ -8,8 +8,8 @@ const API_BASE = "http://localhost:8080";
 const ROUTE_FOR_ROLE = {
     employee: "/employee",
     receptionist: "/receptionist",
-    manager: "/manager",
-    admin: "/manager"
+    manager: "/employee",
+    admin: "/employee"
 };
 
 const lower = (v) => (typeof v === "string" ? v.trim().toLowerCase() : "");

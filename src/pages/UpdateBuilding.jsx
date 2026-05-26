@@ -16,7 +16,7 @@ const mapApiBuilding = (b) => ({
     })),
 });
 
-const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
+const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const [buildingSearch, setBuildingSearch] = useState("");
     const [showScanEmployeeQrModal, setShowScanEmployeeQrModal] = useState(false);
     const [buildings, setBuildings] = useState([]);
@@ -57,16 +57,6 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         if (!term) return;
         const found = buildings.find((b) => b.name.toLowerCase().includes(term));
         if (found) loadBuildingIntoForm(found);
-    };
-
-    const handleAddBuilding = () => {
-        setSelectedBuilding(null);
-        setName("");
-        setAddress("");
-        setShelves([]);
-        setShelfName("");
-        setShelfRowCount("");
-        setSaveError(null);
     };
 
     const handleAddShelf = () => {
@@ -111,7 +101,7 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const handleSaveBuilding = async () => {
         const trimmedName = name.trim();
         const trimmedAddress = address.trim();
-        if (!trimmedName || !trimmedAddress) return;
+        if (!trimmedName || !trimmedAddress || !selectedBuilding) return;
 
         setSaving(true);
         setSaveError(null);
@@ -133,11 +123,9 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
             const saved = await res.json();
             const mapped = mapApiBuilding(saved);
-            setBuildings((prev) => {
-                const exists = prev.find((b) => b.id === mapped.id);
-                return exists ? prev.map((b) => (b.id === mapped.id ? mapped : b)) : [...prev, mapped];
-            });
+            setBuildings((prev) => prev.map((b) => (b.id === mapped.id ? mapped : b)));
             setSelectedBuilding(mapped);
+            setShelves(mapped.shelves || []);
         } catch (e) {
             setSaveError(e.message);
         } finally {
@@ -145,13 +133,13 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         }
     };
 
-    const handleEmployeeQrScan = () => {
-        setShowScanEmployeeQrModal(false);
-    };
+    const handleEmployeeQrScan = () => setShowScanEmployeeQrModal(false);
 
     const filteredBuildings = buildings.filter((b) =>
         b.name.toLowerCase().includes(buildingSearch.toLowerCase())
     );
+
+    const disabled = !selectedBuilding;
 
     return (
         <div className="dashboard">
@@ -188,31 +176,21 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                             <option key={b.id} value={b.id}>{b.name}</option>
                         ))}
                     </select>
-
-                    <span className="or-text">OR</span>
-
-                    <button className="add-building-button" onClick={handleAddBuilding} type="button">
-                        Add building
-                    </button>
                 </div>
 
                 <div className="building-info-header">
                     <h2>Building information</h2>
-                    <button className="edit-button" onClick={handleSaveBuilding} type="button" disabled={saving}>
-                        {saving ? "Saving..." : "Save"}
-                    </button>
-                    {saveError && <span style={{ color: "red", fontSize: 13 }}>{saveError}</span>}
                 </div>
 
                 <div className="manager-form-grid">
                     <div className="form-group">
                         <label>Name</label>
-                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} disabled={disabled} />
                     </div>
 
                     <div className="form-group">
                         <label>Address</label>
-                        <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
+                        <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} disabled={disabled} />
                     </div>
                 </div>
 
@@ -228,6 +206,7 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                             value={shelfName}
                             onChange={(e) => setShelfName(e.target.value)}
                             placeholder="Enter shelf name"
+                            disabled={disabled}
                         />
                     </div>
 
@@ -239,17 +218,17 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                             onChange={(e) => setShelfRowCount(e.target.value)}
                             placeholder="Enter row amount"
                             min="1"
+                            disabled={disabled}
                         />
                     </div>
 
-                    <button className="add-shelf-button" onClick={handleAddShelf} type="button">
+                    <button className="add-shelf-button" onClick={handleAddShelf} type="button" disabled={disabled}>
                         Add shelf
                     </button>
                 </div>
 
                 <div className="form-group full-width-group">
                     <label>Added shelves</label>
-
                     <div className="floor-names-box">
                         {shelves.length > 0 ? (
                             shelves.map((shelf, index) => (
@@ -265,9 +244,18 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                                 </div>
                             ))
                         ) : (
-                            <div className="floor-row empty-floor-row">No shelves added</div>
+                            <div className="floor-row empty-floor-row">
+                                {selectedBuilding ? "No shelves added" : "Select a building to view shelves"}
+                            </div>
                         )}
                     </div>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", gap: 12, marginTop: 20 }}>
+                    {saveError && <span style={{ color: "red", fontSize: 13 }}>{saveError}</span>}
+                    <button className="edit-button" onClick={handleSaveBuilding} type="button" disabled={saving || disabled}>
+                        {saving ? "Saving..." : "Save"}
+                    </button>
                 </div>
 
                 {showScanEmployeeQrModal && (
@@ -330,4 +318,4 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     );
 };
 
-export default Manager;
+export default UpdateBuilding;
