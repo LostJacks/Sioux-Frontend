@@ -6,7 +6,6 @@ import PackageTabs from "../components/PackageTabs";
 import ReceptionistPanel from "../components/ReceptionistPanel";
 import ScanQrModal from "../components/ScanQrModal";
 import StorePackageModal from "../components/StorePackageModal";
-import { orders as mockOrders } from "../data/orders";
 
 const API_BASE = "http://localhost:8080/api";
 
@@ -18,15 +17,6 @@ const mapOrder = (o) => ({
     location: o.rowLocation || o.buildingName || o.location || "",
     employee: o.employee,
 });
-
-const normalisedMockOrders = mockOrders.map((o) => ({
-    pkgId: null,
-    id: o.id,
-    courier: o.courier,
-    status: o.status,
-    location: o.location || "",
-    employee: null,
-}));
 
 const isStored = (status) => {
     const s = status?.toUpperCase();
@@ -46,32 +36,23 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const [scanBanner, setScanBanner] = useState(null);
     const [scannedPackage, setScannedPackage] = useState(null);
 
-    const mergeWithMock = (apiList) => [...apiList, ...normalisedMockOrders];
-
     useEffect(() => {
         const fetchOrders = async () => {
             try {
                 const res = await fetch(`${API_BASE}/orders`);
-
-                if (!res.ok) {
-                    throw new Error();
-                }
-
+                if (!res.ok) throw new Error();
                 const data = await res.json();
-
                 const mapped = data.map(mapOrder);
-
                 setApiOrders(mapped);
-                setDisplayOrders(mergeWithMock(mapped));
+                setDisplayOrders(mapped);
             } catch {
-                setDisplayOrders(normalisedMockOrders);
+                setDisplayOrders([]);
             }
         };
 
         fetchOrders();
 
         const interval = setInterval(fetchOrders, 20000);
-
         return () => clearInterval(interval);
     }, []);
 
@@ -140,7 +121,7 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     };
 
     const handleClearScan = () => {
-        setDisplayOrders(mergeWithMock(apiOrders));
+        setDisplayOrders(apiOrders);
         setScanBanner(null);
         setSearchTerm("");
     };
