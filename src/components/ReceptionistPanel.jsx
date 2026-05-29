@@ -53,7 +53,7 @@ const ReceptionistPanel = ({ orders, onPickup }) => {
 
             <div className="orders-panel">
                 <div className="orders-header">
-                    <h2>All Packages</h2>
+                    <h2>Packages</h2>
                 </div>
 
                 <div className="orders-body">

@@ -2,7 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import Receptionist from "./pages/Receptionist";
-import Manager from "./pages/Manager";
+import AddBuilding from "./pages/AddBuilding";
+import UpdateBuilding from "./pages/UpdateBuilding";
 import Notifications from "./pages/Notifications";
 import LoginPage from "./pages/LoginPage";
 import { NotificationProvider } from "./context/NotificationContext";
@@ -96,10 +97,23 @@ const App = () => {
                 />
 
                 <Route
-                    path="/manager"
+                    path="/buildings/add"
                     element={
                         <Protected user={currentUser}>
-                            <Manager
+                            <AddBuilding
+                                currentRole={currentRole}
+                                setCurrentRole={setCurrentRole}
+                                setCurrentUser={setCurrentUser}
+                            />
+                        </Protected>
+                    }
+                />
+
+                <Route
+                    path="/buildings/update"
+                    element={
+                        <Protected user={currentUser}>
+                            <UpdateBuilding
                                 currentRole={currentRole}
                                 setCurrentRole={setCurrentRole}
                                 setCurrentUser={setCurrentUser}
