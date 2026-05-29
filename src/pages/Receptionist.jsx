@@ -6,6 +6,7 @@ import PackageTabs from "../components/PackageTabs";
 import ReceptionistPanel from "../components/ReceptionistPanel";
 import ScanQrModal from "../components/ScanQrModal";
 import StorePackageModal from "../components/StorePackageModal";
+import ReminderSettings from "../components/ReminderSettings";
 
 const API_BASE = "http://localhost:8080/api";
 
@@ -146,6 +147,8 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                         </button>
                     </div>
                 )}
+
+                <ReminderSettings />
 
                 <PackageTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
