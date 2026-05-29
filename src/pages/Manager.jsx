@@ -28,6 +28,7 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const [shelves, setShelves] = useState([]);
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState(null);
+    const [shelfDeleteModal, setShelfDeleteModal] = useState(null);
 
     useEffect(() => {
         fetch(`${API_BASE}/buildings/full`)
@@ -72,13 +73,39 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         const trimmed = shelfName.trim();
         const count = Number(shelfRowCount);
         if (!trimmed || !shelfRowCount.trim() || isNaN(count) || count <= 0) return;
-        setShelves((prev) => [...prev, { id: Date.now(), name: trimmed, rowCount: count }]);
+        setShelves((prev) => [...prev, { id: Date.now(), name: trimmed, rowCount: count, isNew: true }]);
         setShelfName("");
         setShelfRowCount("");
     };
 
-    const handleRemoveShelf = (shelfId) => {
-        setShelves((prev) => prev.filter((s) => s.id !== shelfId));
+    const handleRemoveShelf = async (shelf) => {
+        if (shelf.isNew) {
+            setShelves((prev) => prev.filter((s) => s.id !== shelf.id));
+            return;
+        }
+        try {
+            const res = await fetch(`${API_BASE}/buildings/shelves/${shelf.id}/check`);
+            const data = await res.json();
+            if (data.hasPendingPackages) {
+                setShelfDeleteModal({ type: "blocked" });
+            } else {
+                setShelfDeleteModal({ type: "confirm", shelfId: shelf.id });
+            }
+        } catch {
+            setShelfDeleteModal({ type: "blocked" });
+        }
+    };
+
+    const confirmDeleteShelf = async () => {
+        const { shelfId } = shelfDeleteModal;
+        try {
+            await fetch(`${API_BASE}/buildings/shelves/${shelfId}`, { method: "DELETE" });
+            setShelves((prev) => prev.filter((s) => s.id !== shelfId));
+        } catch {
+            // deletion failed silently; leave shelf in list
+        } finally {
+            setShelfDeleteModal(null);
+        }
     };
 
     const handleSaveBuilding = async () => {
@@ -231,7 +258,7 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                                     <button
                                         type="button"
                                         className="remove-shelf-button"
-                                        onClick={() => handleRemoveShelf(shelf.id)}
+                                        onClick={() => handleRemoveShelf(shelf)}
                                     >
                                         Remove
                                     </button>
@@ -249,6 +276,54 @@ const Manager = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                         onClose={() => setShowScanEmployeeQrModal(false)}
                         onScan={handleEmployeeQrScan}
                     />
+                )}
+
+                {shelfDeleteModal?.type === "blocked" && (
+                    <div className="qr-overlay" onClick={() => setShelfDeleteModal(null)}>
+                        <div className="qr-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="qr-header">
+                                <h3>Cannot Delete Shelf</h3>
+                                <button className="qr-close" onClick={() => setShelfDeleteModal(null)}>✕</button>
+                            </div>
+                            <p style={{ margin: "0 0 20px", fontSize: 14, color: "#374151", lineHeight: 1.6 }}>
+                                This shelf has packages that have not been picked up yet. Please wait until all packages are collected before deleting this shelf.
+                            </p>
+                            <button
+                                style={{ width: "100%", height: 42, border: "none", borderRadius: 12, background: "#111111", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+                                onClick={() => setShelfDeleteModal(null)}
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {shelfDeleteModal?.type === "confirm" && (
+                    <div className="qr-overlay" onClick={() => setShelfDeleteModal(null)}>
+                        <div className="qr-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="qr-header">
+                                <h3>Delete Shelf</h3>
+                                <button className="qr-close" onClick={() => setShelfDeleteModal(null)}>✕</button>
+                            </div>
+                            <p style={{ margin: "0 0 20px", fontSize: 14, color: "#374151", lineHeight: 1.6 }}>
+                                Are you sure you want to delete this shelf? This action cannot be undone.
+                            </p>
+                            <div style={{ display: "flex", gap: 10 }}>
+                                <button
+                                    style={{ flex: 1, height: 42, border: "1px solid #d9dfe7", borderRadius: 12, background: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+                                    onClick={() => setShelfDeleteModal(null)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    style={{ flex: 1, height: 42, border: "none", borderRadius: 12, background: "linear-gradient(135deg,#ff6b2c,#ff8447)", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+                                    onClick={confirmDeleteShelf}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </main>
         </div>

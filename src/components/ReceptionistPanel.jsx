@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OrderRow from "./OrderRow";
 import NotifyManagersModal from "./NotifyManagersModal";
 import { useNotification } from "../hooks/useNotification";
@@ -7,9 +7,17 @@ import { getPickupReminder } from "../services/orderApi";
 const ReceptionistPanel = ({ orders, onPickup }) => {
     const { showNotification } = useNotification() || {};
     const [notifyTarget, setNotifyTarget] = useState(null);
+    const [lastUpdate, setLastUpdate] = useState(null);
+
+    useEffect(() => {
+        setLastUpdate(new Date());
+    }, [orders]);
 
     const openNotifyModal = (order) => setNotifyTarget(order);
-    const closeNotifyModal = () => setNotifyTarget(null);
+
+    const closeNotifyModal = () => {
+        setNotifyTarget(null);
+    };
 
     const handleSent = (notification) => {
         if (notification && typeof showNotification === "function") {
@@ -19,8 +27,10 @@ const ReceptionistPanel = ({ orders, onPickup }) => {
 
     const handleSendReminder = async (order) => {
         if (!order?.pkgId) return;
+
         try {
             const data = await getPickupReminder(order.pkgId);
+
             if (typeof showNotification === "function") {
                 showNotification(data);
             }
@@ -31,7 +41,15 @@ const ReceptionistPanel = ({ orders, onPickup }) => {
 
     return (
         <section className="orders-wrapper">
-            <p className="last-update">Last update: Today, 13:45</p>
+            <p className="last-update">
+                Last update:{" "}
+                {lastUpdate
+                    ? `Today, ${lastUpdate.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    })}`
+                    : "Loading..."}
+            </p>
 
             <div className="orders-panel">
                 <div className="orders-header">
@@ -50,7 +68,9 @@ const ReceptionistPanel = ({ orders, onPickup }) => {
                             />
                         ))
                     ) : (
-                        <p className="no-orders-text">No packages found.</p>
+                        <p className="no-orders-text">
+                            No packages found.
+                        </p>
                     )}
                 </div>
             </div>

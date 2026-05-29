@@ -50,16 +50,30 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const mergeWithMock = (apiList) => [...apiList, ...normalisedMockOrders];
 
     useEffect(() => {
-        fetch(`${API_BASE}/orders`)
-            .then((res) => res.json())
-            .then((data) => {
+        const fetchOrders = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/orders`);
+
+                if (!res.ok) {
+                    throw new Error();
+                }
+
+                const data = await res.json();
+
                 const mapped = data.map(mapOrder);
+
                 setApiOrders(mapped);
                 setDisplayOrders(mergeWithMock(mapped));
-            })
-            .catch(() => {
+            } catch {
                 setDisplayOrders(normalisedMockOrders);
-            });
+            }
+        };
+
+        fetchOrders();
+
+        const interval = setInterval(fetchOrders, 20000);
+
+        return () => clearInterval(interval);
     }, []);
 
     const filteredOrders = displayOrders.filter((order) => {

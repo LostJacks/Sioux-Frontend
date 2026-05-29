@@ -1,9 +1,17 @@
 import OrderRow from "./OrderRow";
 
-const OrdersPanel = ({ orders }) => {
+const OrdersPanel = ({ orders, lastUpdate }) => {
     return (
         <section className="orders-wrapper">
-            <p className="last-update">Connected to backend</p>
+            <p className="last-update">
+                Last update:{" "}
+                {lastUpdate
+                    ? `Today, ${lastUpdate.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    })}`
+                    : "Loading..."}
+            </p>
 
             <div className="orders-panel">
                 <div className="orders-header">
@@ -12,9 +20,16 @@ const OrdersPanel = ({ orders }) => {
 
                 <div className="orders-body">
                     {orders.length > 0 ? (
-                        orders.map((order) => <OrderRow key={order.id} order={order} />)
+                        orders.map((order) => (
+                            <OrderRow
+                                key={order.id}
+                                order={order}
+                            />
+                        ))
                     ) : (
-                        <p className="no-orders-text">No orders found.</p>
+                        <p className="no-orders-text">
+                            No orders found.
+                        </p>
                     )}
                 </div>
             </div>
