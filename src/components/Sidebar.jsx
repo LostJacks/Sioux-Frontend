@@ -8,17 +8,17 @@ const Sidebar = ({ currentRole, setCurrentUser }) => {
 
     const allowedRoles = {
         employee: [
-            { label: "Employee", path: "/employee" },
+            { label: "My Packages", path: "/employee" },
             { label: "Notifications", path: "/notifications" }
         ],
         manager: [
-            { label: "Employee", path: "/employee" },
+            { label: "My Packages", path: "/employee" },
             { label: "Add building", path: "/buildings/add" },
             { label: "Update building", path: "/buildings/update" },
             { label: "Notifications", path: "/notifications" }
         ],
         receptionist: [
-            { label: "Employee", path: "/employee" },
+            { label: "My packages", path: "/employee" },
             { label: "Receptionist", path: "/receptionist" },
             { label: "Notifications", path: "/notifications" }
         ]

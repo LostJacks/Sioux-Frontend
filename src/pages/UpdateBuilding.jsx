@@ -9,6 +9,7 @@ const mapApiBuilding = (b) => ({
     id: b.id,
     name: b.name,
     address: b.address || "",
+    floorNumber: b.floors?.[0]?.floorNumber ?? 1,
     shelves: (b.floors?.[0]?.shelves || []).map((s, i) => ({
         id: s.id,
         name: `Shelf ${s.shelfNumber ?? i + 1}`,
@@ -17,12 +18,13 @@ const mapApiBuilding = (b) => ({
 });
 
 const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
-    const [buildingSearch, setBuildingSearch] = useState("");
+    const [buildingSearch] = useState("");
     const [showScanEmployeeQrModal, setShowScanEmployeeQrModal] = useState(false);
     const [buildings, setBuildings] = useState([]);
     const [selectedBuilding, setSelectedBuilding] = useState(null);
     const [name, setName] = useState("");
     const [address, setAddress] = useState("");
+    const [floorNumber, setFloorNumber] = useState("1");
     const [shelfName, setShelfName] = useState("");
     const [shelfRowCount, setShelfRowCount] = useState("");
     const [shelves, setShelves] = useState([]);
@@ -41,6 +43,7 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         setSelectedBuilding(building);
         setName(building.name);
         setAddress(building.address);
+        setFloorNumber(String(building.floorNumber ?? 1));
         setShelves(building.shelves || []);
         setShelfName("");
         setShelfRowCount("");
@@ -50,13 +53,6 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const handleBuildingChange = (e) => {
         const building = buildings.find((b) => String(b.id) === e.target.value);
         if (building) loadBuildingIntoForm(building);
-    };
-
-    const handleSearchBuilding = () => {
-        const term = buildingSearch.trim().toLowerCase();
-        if (!term) return;
-        const found = buildings.find((b) => b.name.toLowerCase().includes(term));
-        if (found) loadBuildingIntoForm(found);
     };
 
     const handleAddShelf = () => {
@@ -101,7 +97,8 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const handleSaveBuilding = async () => {
         const trimmedName = name.trim();
         const trimmedAddress = address.trim();
-        if (!trimmedName || !trimmedAddress || !selectedBuilding) return;
+        const parsedFloor = Number(floorNumber);
+        if (!trimmedName || !trimmedAddress || !selectedBuilding || Number.isNaN(parsedFloor) || parsedFloor <= 0) return;
 
         setSaving(true);
         setSaveError(null);
@@ -109,12 +106,15 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         const payload = {
             name: trimmedName,
             address: trimmedAddress,
-            shelves: shelves.map((s) => ({ name: s.name, rowCount: s.rowCount })),
+            floorNumber: parsedFloor,
+            shelves: shelves
+                .filter((s) => s.isNew)
+                .map((s) => ({ name: s.name, rowCount: s.rowCount })),
         };
 
         try {
-            const res = await fetch(`${API_BASE}/buildings`, {
-                method: "POST",
+            const res = await fetch(`${API_BASE}/buildings/${selectedBuilding.id}`, {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
@@ -147,19 +147,7 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
             <main className="manager-content">
                 <div className="manager-top-row">
-                    <div className="manager-search-bar">
-                        <input
-                            type="text"
-                            placeholder="Building search"
-                            value={buildingSearch}
-                            onChange={(e) => setBuildingSearch(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") handleSearchBuilding(); }}
-                        />
-                        <button className="manager-search-button" type="button" onClick={handleSearchBuilding}>
-                            🔍
-                        </button>
-                    </div>
-
+                    <h2 style={{ margin: 0 }}>Update building</h2>
                     <button className="scan-employee-button" onClick={() => setShowScanEmployeeQrModal(true)}>
                         Scan Employee QR
                     </button>
@@ -191,6 +179,17 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                     <div className="form-group">
                         <label>Address</label>
                         <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} disabled={disabled} />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Floor number</label>
+                        <input
+                            type="number"
+                            min="1"
+                            value={floorNumber}
+                            onChange={(e) => setFloorNumber(e.target.value)}
+                            disabled={disabled}
+                        />
                     </div>
                 </div>
 

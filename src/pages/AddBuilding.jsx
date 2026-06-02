@@ -9,6 +9,7 @@ const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const [showScanEmployeeQrModal, setShowScanEmployeeQrModal] = useState(false);
     const [name, setName] = useState("");
     const [address, setAddress] = useState("");
+    const [floorNumber, setFloorNumber] = useState("1");
     const [shelfName, setShelfName] = useState("");
     const [shelfRowCount, setShelfRowCount] = useState("");
     const [shelves, setShelves] = useState([]);
@@ -32,7 +33,8 @@ const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const handleSaveBuilding = async () => {
         const trimmedName = name.trim();
         const trimmedAddress = address.trim();
-        if (!trimmedName || !trimmedAddress) return;
+        const parsedFloor = Number(floorNumber);
+        if (!trimmedName || !trimmedAddress || Number.isNaN(parsedFloor) || parsedFloor <= 0) return;
 
         setSaving(true);
         setSaveError(null);
@@ -41,6 +43,7 @@ const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         const payload = {
             name: trimmedName,
             address: trimmedAddress,
+            floorNumber: parsedFloor,
             shelves: shelves.map((s) => ({ name: s.name, rowCount: s.rowCount })),
         };
 
@@ -56,6 +59,7 @@ const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
             setName("");
             setAddress("");
+            setFloorNumber("1");
             setShelves([]);
             setShelfName("");
             setShelfRowCount("");
@@ -94,6 +98,16 @@ const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                     <div className="form-group">
                         <label>Address</label>
                         <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Floor number</label>
+                        <input
+                            type="number"
+                            min="1"
+                            value={floorNumber}
+                            onChange={(e) => setFloorNumber(e.target.value)}
+                        />
                     </div>
                 </div>
 

@@ -102,9 +102,6 @@ const ReminderSettings = () => {
                                 />
                                 <span className="reminder-unit">hours</span>
                             </div>
-                            <p className="reminder-field-hint">
-                                How many hours after a package arrives before the first reminder is sent.
-                            </p>
                         </div>
 
                         <div className="reminder-field">
@@ -125,9 +122,6 @@ const ReminderSettings = () => {
                                 />
                                 <span className="reminder-unit">hours</span>
                             </div>
-                            <p className="reminder-field-hint">
-                                Interval between follow-up reminders. Set to 0 to send only one reminder.
-                            </p>
                         </div>
 
                         <div className="reminder-field">
@@ -148,26 +142,7 @@ const ReminderSettings = () => {
                                 />
                                 <span className="reminder-unit">total</span>
                             </div>
-                            <p className="reminder-field-hint">
-                                Maximum reminders per package. Set to 0 for unlimited.
-                            </p>
                         </div>
-                    </div>
-
-                    <div className="reminder-summary">
-                        {settings.enabled ? (
-                            <span>
-                                 First reminder <strong>{settings.initialDelayHours}h</strong> after arrival
-                                {settings.repeatIntervalHours > 0
-                                    ? <>, then every <strong>{settings.repeatIntervalHours}h</strong></>
-                                    : ", no repeats"}
-                                {settings.maxReminders > 0
-                                    ? <> up to <strong>{settings.maxReminders}</strong> reminder(s) per package.</>
-                                    : " — unlimited reminders."}
-                            </span>
-                        ) : (
-                            <span>⏸ Automatic reminders are currently disabled.</span>
-                        )}
                     </div>
                 </div>
             )}

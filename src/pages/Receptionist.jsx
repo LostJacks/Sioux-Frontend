@@ -1,68 +1,107 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "../styles/receptionist.css";
 import Sidebar from "../components/Sidebar";
 import ReceptionistTopBar from "../components/ReceptionistTopBar";
-import PackageTabs from "../components/PackageTabs";
+import PackageFilters from "../components/PackageFilters";
 import ReceptionistPanel from "../components/ReceptionistPanel";
 import ScanQrModal from "../components/ScanQrModal";
 import StorePackageModal from "../components/StorePackageModal";
 import ReminderSettings from "../components/ReminderSettings";
+import {
+    formatLocationFromParts,
+    getStatusSortRank,
+    matchesPackageFilters,
+} from "../utils/packageFilterUtils";
 
 const API_BASE = "http://localhost:8080/api";
 
-const mapOrder = (o) => ({
-    pkgId: o.id,
-    id: o.trackingNumber || String(o.id),
-    courier: o.courier || "",
-    status: o.pickedUp ? "PICKED_UP" : (o.status?.name || o.status || "REGISTERED"),
-    location: o.rowLocation || o.buildingName || o.location || "",
-    employee: o.employee,
-});
+const mapOrder = (o) => {
+    const buildingName = o.buildingName || o.building?.name || "";
+    const floorNumber = o.floorNumber ?? o.floor?.floorNumber ?? null;
+    const shelfNumber = o.shelfNumber ?? o.shelf?.shelfNumber ?? null;
+    const rowNumber = o.rowNumber ?? o.row?.rowNumber ?? null;
 
-const isStored = (status) => {
-    const s = status?.toUpperCase();
-    return s === "STORED" || s === "READY" || s === "READY_FOR_PICKUP";
+    const structuredLocation = formatLocationFromParts({
+        buildingName,
+        floorNumber,
+        shelfNumber,
+        rowNumber,
+    });
+
+    return {
+        pkgId: o.id,
+        id: o.trackingNumber || String(o.id),
+        courier: o.courier || "",
+        status: o.pickedUp ? "PICKED_UP" : (o.status?.name || o.status || "REGISTERED"),
+        location: o.rowLocation || structuredLocation || buildingName || o.location || "",
+        employee: o.employee,
+        pickedUp: o.pickedUp === true,
+        buildingName,
+        buildingId: o.buildingId ?? o.building?.id ?? null,
+        floorNumber,
+        floorId: o.floorId ?? o.floor?.id ?? null,
+        shelfNumber,
+        shelfId: o.shelfId ?? o.shelf?.id ?? null,
+        rowNumber,
+        rowId: o.rowId ?? o.row?.id ?? null,
+        deliveredAt: o.deliveredAt || null,
+    };
 };
-
-const isPickedUp = (status) => status?.toUpperCase() === "PICKED_UP";
-
-const isIncoming = (status) => !isStored(status) && !isPickedUp(status);
 
 const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const [apiOrders, setApiOrders] = useState([]);
     const [displayOrders, setDisplayOrders] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [activeTab, setActiveTab] = useState("all");
+    const [statusFilters, setStatusFilters] = useState([]);
     const [scanType, setScanType] = useState(null);
     const [scanBanner, setScanBanner] = useState(null);
     const [scannedPackage, setScannedPackage] = useState(null);
 
     useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const res = await fetch(`${API_BASE}/orders`);
+        fetch(`${API_BASE}/orders`)
+            .then((res) => {
                 if (!res.ok) throw new Error();
-                const data = await res.json();
+                return res.json();
+            })
+            .then((data) => {
                 const mapped = data.map(mapOrder);
                 setApiOrders(mapped);
                 setDisplayOrders(mapped);
-            } catch {
+            })
+            .catch(() => {
                 setDisplayOrders([]);
-            }
-        };
-
-        fetchOrders();
-
-        const interval = setInterval(fetchOrders, 20000);
-        return () => clearInterval(interval);
+            });
     }, []);
 
-    const filteredOrders = displayOrders.filter((order) => {
-        const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase());
-        if (activeTab === "incoming") return matchesSearch && isIncoming(order.status);
-        if (activeTab === "stored") return matchesSearch && isStored(order.status);
-        return matchesSearch;
-    });
+    const filteredOrders = useMemo(
+        () =>
+            [...displayOrders]
+                .filter((order) => {
+                    const tracking = order.id?.toLowerCase() || "";
+                    const employeeName = order.employee
+                        ? `${order.employee.firstName} ${order.employee.lastName}`.toLowerCase()
+                        : "";
+                    const courier = order.courier?.toLowerCase() || "";
+                    const location = order.location?.toLowerCase() || "";
+                    const query = searchTerm.toLowerCase().trim();
+
+                    const matchesSearch =
+                        !query ||
+                        tracking.includes(query) ||
+                        employeeName.includes(query) ||
+                        courier.includes(query) ||
+                        location.includes(query);
+
+                    if (!matchesSearch) return false;
+                    return matchesPackageFilters(order, statusFilters);
+                })
+                .sort((a, b) => {
+                    const byStatus = getStatusSortRank(a) - getStatusSortRank(b);
+                    if (byStatus !== 0) return byStatus;
+                    return (b.pkgId || 0) - (a.pkgId || 0);
+                }),
+        [displayOrders, searchTerm, statusFilters]
+    );
 
     const handleEmployeeScan = async (scannedValue) => {
         const spmsMatch = scannedValue.match(/^SPMS:EMP:(\d+):(.+)$/);
@@ -104,7 +143,6 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
             const exists = prev.find((o) => o.pkgId === mapped.pkgId);
             return exists ? prev.map((o) => (o.pkgId === mapped.pkgId ? mapped : o)) : [mapped, ...prev];
         });
-        setScanBanner({ type: "package", message: `Package stored: ${mapped.id}` });
     };
 
     const handlePickup = async (pkgId) => {
@@ -150,7 +188,11 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
                 <ReminderSettings />
 
-                <PackageTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+                <PackageFilters
+                    statusFilters={statusFilters}
+                    setStatusFilters={setStatusFilters}
+                    resultCount={filteredOrders.length}
+                />
 
                 <ReceptionistPanel orders={filteredOrders} onPickup={handlePickup} />
 

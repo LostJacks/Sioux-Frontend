@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "../styles/employee.css";
 import Sidebar from "../components/Sidebar";
 import SearchBar from "../components/SearchBar";
 import QrButton from "../components/QrButton";
 import OrdersPanel from "../components/OrdersPanel";
 import EmployeeQrModal from "../components/EmployeeQrModal";
+import PackageFilters from "../components/PackageFilters";
+import { getStatusSortRank, matchesPackageFilters } from "../utils/packageFilterUtils";
 
 const API_BASE = "http://localhost:8080/api";
 
@@ -14,6 +16,7 @@ const Dashboard = ({ currentRole, setCurrentUser, currentUser }) => {
     const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
     const [orders, setOrders] = useState([]);
     const [lastUpdate, setLastUpdate] = useState(null);
+    const [statusFilters, setStatusFilters] = useState([]);
 
     useEffect(() => {
         if (currentUser?.id) {
@@ -43,8 +46,24 @@ const Dashboard = ({ currentRole, setCurrentUser, currentUser }) => {
             .catch(() => { });
     }, [selectedEmployeeId]);
 
-    const filteredOrders = orders.filter((o) =>
-        o.id.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredOrders = useMemo(
+        () =>
+            [...orders]
+                .filter((o) => {
+                    const query = searchTerm.toLowerCase();
+                    const matchesSearch =
+                        o.id.toLowerCase().includes(query) ||
+                        (o.courier || "").toLowerCase().includes(query) ||
+                        (o.location || "").toLowerCase().includes(query);
+                    if (!matchesSearch) return false;
+                    return matchesPackageFilters(o, statusFilters);
+                })
+                .sort((a, b) => {
+                    const byStatus = getStatusSortRank(a) - getStatusSortRank(b);
+                    if (byStatus !== 0) return byStatus;
+                    return (b.pkgId || 0) - (a.pkgId || 0);
+                }),
+        [orders, searchTerm, statusFilters]
     );
 
     return (
@@ -66,6 +85,13 @@ const Dashboard = ({ currentRole, setCurrentUser, currentUser }) => {
                     </div>
                 </div>
 
+                <div className="employee-filter-wrap">
+                    <PackageFilters
+                        statusFilters={statusFilters}
+                        setStatusFilters={setStatusFilters}
+                        resultCount={filteredOrders.length}
+                    />
+                </div>
                 <OrdersPanel
                     orders={filteredOrders}
                     lastUpdate={lastUpdate}
