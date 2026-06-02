@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import "../styles/manager.css";
 import Sidebar from "../components/Sidebar";
-import ScanQrModal from "../components/ScanQrModal";
 
 const API_BASE = "http://localhost:8080/api";
 
@@ -19,7 +18,6 @@ const mapApiBuilding = (b) => ({
 
 const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     const [buildingSearch] = useState("");
-    const [showScanEmployeeQrModal, setShowScanEmployeeQrModal] = useState(false);
     const [buildings, setBuildings] = useState([]);
     const [selectedBuilding, setSelectedBuilding] = useState(null);
     const [name, setName] = useState("");
@@ -134,8 +132,6 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         }
     };
 
-    const handleEmployeeQrScan = () => setShowScanEmployeeQrModal(false);
-
     const filteredBuildings = buildings.filter((b) =>
         b.name.toLowerCase().includes(buildingSearch.toLowerCase())
     );
@@ -149,9 +145,6 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
             <main className="manager-content">
                 <div className="manager-top-row">
                     <h2 style={{ margin: 0 }}>Update building</h2>
-                    <button className="scan-employee-button" onClick={() => setShowScanEmployeeQrModal(true)}>
-                        Scan Employee QR
-                    </button>
                 </div>
 
                 <div className="manager-building-row">
@@ -268,14 +261,6 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                         {saving ? "Saving..." : "Save"}
                     </button>
                 </div>
-
-                {showScanEmployeeQrModal && (
-                    <ScanQrModal
-                        title="Scan Employee QR"
-                        onClose={() => setShowScanEmployeeQrModal(false)}
-                        onScan={handleEmployeeQrScan}
-                    />
-                )}
 
                 {shelfDeleteModal?.type === "blocked" && (
                     <div className="qr-overlay" onClick={() => setShelfDeleteModal(null)}>
