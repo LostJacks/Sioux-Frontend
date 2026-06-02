@@ -29,11 +29,8 @@ const ReceptionistPanel = ({ orders, onPickup }) => {
         if (!order?.pkgId) return;
 
         try {
-            const data = await getPickupReminder(order.pkgId);
-
-            if (typeof showNotification === "function") {
-                showNotification(data);
-            }
+            await getPickupReminder(order.pkgId);
+            // Reminder is sent to the employee — no toast for the receptionist.
         } catch (err) {
             console.error("Failed to send reminder:", err);
         }
