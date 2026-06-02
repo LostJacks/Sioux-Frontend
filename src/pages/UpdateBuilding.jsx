@@ -44,6 +44,7 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         setName(building.name);
         setAddress(building.address);
         setFloorNumber(String(building.floorNumber ?? 1));
+        setFloorNumber(String(building.floorNumber ?? 1));
         setShelves(building.shelves || []);
         setShelfName("");
         setShelfRowCount("");
@@ -179,6 +180,17 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                     <div className="form-group">
                         <label>Address</label>
                         <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} disabled={disabled} />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Floor number</label>
+                        <input
+                            type="number"
+                            min="1"
+                            value={floorNumber}
+                            onChange={(e) => setFloorNumber(e.target.value)}
+                            disabled={disabled}
+                        />
                     </div>
 
                     <div className="form-group">

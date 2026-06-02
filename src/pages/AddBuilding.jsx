@@ -1,12 +1,10 @@
 import { useState } from "react";
 import "../styles/manager.css";
 import Sidebar from "../components/Sidebar";
-import ScanQrModal from "../components/ScanQrModal";
 
 const API_BASE = "http://localhost:8080/api";
 
 const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
-    const [showScanEmployeeQrModal, setShowScanEmployeeQrModal] = useState(false);
     const [name, setName] = useState("");
     const [address, setAddress] = useState("");
     const [floorNumber, setFloorNumber] = useState("1");
@@ -71,19 +69,12 @@ const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
         }
     };
 
-    const handleEmployeeQrScan = () => setShowScanEmployeeQrModal(false);
 
     return (
         <div className="dashboard">
             <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
 
             <main className="manager-content">
-                <div className="manager-top-row">
-                    <h2 style={{ margin: 0 }}>Add building</h2>
-                    <button className="scan-employee-button" onClick={() => setShowScanEmployeeQrModal(true)}>
-                        Scan Employee QR
-                    </button>
-                </div>
 
                 <div className="building-info-header">
                     <h2>Building information</h2>
@@ -171,14 +162,6 @@ const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                         {saving ? "Saving..." : "Save"}
                     </button>
                 </div>
-
-                {showScanEmployeeQrModal && (
-                    <ScanQrModal
-                        title="Scan Employee QR"
-                        onClose={() => setShowScanEmployeeQrModal(false)}
-                        onScan={handleEmployeeQrScan}
-                    />
-                )}
             </main>
         </div>
     );
