@@ -5,6 +5,7 @@ import Receptionist from "./pages/Receptionist";
 import AddBuilding from "./pages/AddBuilding";
 import UpdateBuilding from "./pages/UpdateBuilding";
 import Notifications from "./pages/Notifications";
+import Settings from "./pages/Settings";
 import LoginPage from "./pages/LoginPage";
 import { NotificationProvider } from "./context/NotificationContext";
 
@@ -131,6 +132,23 @@ const App = () => {
                                 setCurrentRole={setCurrentRole}
                                 setCurrentUser={setCurrentUser}
                             />
+                        </Protected>
+                    }
+                />
+
+                <Route
+                    path="/settings"
+                    element={
+                        <Protected user={currentUser}>
+                            {currentRole === "receptionist" ? (
+                                <Settings
+                                    currentRole={currentRole}
+                                    setCurrentRole={setCurrentRole}
+                                    setCurrentUser={setCurrentUser}
+                                />
+                            ) : (
+                                <Navigate to="/employee" replace />
+                            )}
                         </Protected>
                     }
                 />

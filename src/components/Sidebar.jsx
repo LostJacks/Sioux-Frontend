@@ -20,7 +20,8 @@ const Sidebar = ({ currentRole, setCurrentUser }) => {
         receptionist: [
             { label: "My packages", path: "/employee" },
             { label: "Receptionist", path: "/receptionist" },
-            { label: "Notifications", path: "/notifications" }
+            { label: "Notifications", path: "/notifications" },
+            { label: "Settings", path: "/settings" }
         ]
     };
 

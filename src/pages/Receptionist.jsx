@@ -6,7 +6,6 @@ import PackageFilters from "../components/PackageFilters";
 import ReceptionistPanel from "../components/ReceptionistPanel";
 import ScanQrModal from "../components/ScanQrModal";
 import StorePackageModal from "../components/StorePackageModal";
-import ReminderSettings from "../components/ReminderSettings";
 import {
     formatLocationFromParts,
     getStatusSortRank,
@@ -134,6 +133,7 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
     };
 
     const handleStored = (storedOrder) => {
+        if (!storedOrder || !storedOrder.pkgId) return;
         const mapped = mapOrder(storedOrder);
         setApiOrders((prev) => {
             const exists = prev.find((o) => o.pkgId === mapped.pkgId);
@@ -181,12 +181,10 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                     <div className={`scan-banner scan-banner--${scanBanner.type}`}>
                         <span>{scanBanner.message}</span>
                         <button className="scan-banner-clear" onClick={handleClearScan}>
-                            Show all
+                            Clear
                         </button>
                     </div>
                 )}
-
-                <ReminderSettings />
 
                 <PackageFilters
                     statusFilters={statusFilters}
@@ -194,24 +192,27 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                     resultCount={filteredOrders.length}
                 />
 
-                <ReceptionistPanel orders={filteredOrders} onPickup={handlePickup} />
-
-                {scanType && (
-                    <ScanQrModal
-                        title={scanType === "employee" ? "Scan Employee QR" : "Scan Package Barcode"}
-                        onClose={() => setScanType(null)}
-                        onScan={handleScan}
-                    />
-                )}
-
-                {scannedPackage && (
-                    <StorePackageModal
-                        trackingNumber={scannedPackage}
-                        onClose={() => setScannedPackage(null)}
-                        onStored={handleStored}
-                    />
-                )}
+                <ReceptionistPanel
+                    orders={filteredOrders}
+                    onPickup={handlePickup}
+                />
             </main>
+
+            {scanType && (
+                <ScanQrModal
+                    mode={scanType}
+                    onScan={handleScan}
+                    onClose={() => setScanType(null)}
+                />
+            )}
+
+            {scannedPackage && (
+                <StorePackageModal
+                    trackingNumber={scannedPackage}
+                    onClose={() => setScannedPackage(null)}
+                    onStored={handleStored}
+                />
+            )}
         </div>
     );
 };
