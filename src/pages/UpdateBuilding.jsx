@@ -185,17 +185,6 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                             disabled={disabled}
                         />
                     </div>
-
-                    <div className="form-group">
-                        <label>Floor number</label>
-                        <input
-                            type="number"
-                            min="1"
-                            value={floorNumber}
-                            onChange={(e) => setFloorNumber(e.target.value)}
-                            disabled={disabled}
-                        />
-                    </div>
                 </div>
 
                 <div className="building-info-header">
