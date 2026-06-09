@@ -224,9 +224,11 @@ const StorePackageModal = ({ trackingNumber, onClose, onStored }) => {
                             onChange={(e) => {
                                 const b = buildings.find((b) => b.id === Number(e.target.value));
                                 setSelectedBuilding(b || null);
-                                setSelectedFloor(null);
-                                setSelectedShelf(null);
-                                setSelectedRow(null);
+                                const firstFloor = b?.floors?.[0] || null;
+                                setSelectedFloor(firstFloor);
+                                const firstShelf = firstFloor?.shelves?.[0] || null;
+                                setSelectedShelf(firstShelf);
+                                setSelectedRow(firstShelf?.rows?.[0] || null);
                             }}
                         >
                             <option value="" disabled>Select building</option>
@@ -245,8 +247,9 @@ const StorePackageModal = ({ trackingNumber, onClose, onStored }) => {
                                 onChange={(e) => {
                                     const f = floors.find((f) => f.id === Number(e.target.value));
                                     setSelectedFloor(f || null);
-                                    setSelectedShelf(null);
-                                    setSelectedRow(null);
+                                    const firstShelf = f?.shelves?.[0] || null;
+                                    setSelectedShelf(firstShelf);
+                                    setSelectedRow(firstShelf?.rows?.[0] || null);
                                 }}
                             >
                                 <option value="" disabled>Select floor</option>
@@ -266,7 +269,7 @@ const StorePackageModal = ({ trackingNumber, onClose, onStored }) => {
                                 onChange={(e) => {
                                     const s = shelves.find((s) => s.id === Number(e.target.value));
                                     setSelectedShelf(s || null);
-                                    setSelectedRow(null);
+                                    setSelectedRow(s?.rows?.[0] || null);
                                 }}
                             >
                                 <option value="" disabled>Select shelf</option>
