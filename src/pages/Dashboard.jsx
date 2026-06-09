@@ -84,14 +84,11 @@ const Dashboard = ({ currentRole, setCurrentUser, currentUser }) => {
                         <QrButton onClick={() => setShowQrModal(true)} />
                     </div>
                 </div>
-
-                <div className="employee-filter-wrap">
-                    <PackageFilters
-                        statusFilters={statusFilters}
-                        setStatusFilters={setStatusFilters}
-                        resultCount={filteredOrders.length}
-                    />
-                </div>
+                <PackageFilters
+                    statusFilters={statusFilters}
+                    setStatusFilters={setStatusFilters}
+                    resultCount={filteredOrders.length}
+                />
                 <OrdersPanel
                     orders={filteredOrders}
                     lastUpdate={lastUpdate}
