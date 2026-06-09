@@ -19,9 +19,9 @@ const Sidebar = ({ currentRole, setCurrentUser }) => {
         ],
         receptionist: [
             { label: "My packages", path: "/employee" },
-            { label: "Receptionist", path: "/receptionist" },
+            { label: "Reception Dashboard", path: "/receptionist" },
             { label: "Notifications", path: "/notifications" },
-            { label: "Settings", path: "/settings" }
+            { label: "Notification Settings", path: "/settings" }
         ]
     };
 
@@ -80,7 +80,9 @@ const Sidebar = ({ currentRole, setCurrentUser }) => {
             <div className="sidebar-bottom">
                 <div className="current-role">
                     <p>Signed in as:</p>
-                    {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
+                    {currentRole === "manager"
+                        ? "Building Manager"
+                        : currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
                 </div>
 
                 <button className="sign-out-button" onClick={handleSignOut}>
