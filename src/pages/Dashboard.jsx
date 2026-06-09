@@ -13,16 +13,10 @@ const API_BASE = "http://localhost:8080/api";
 const Dashboard = ({ currentRole, setCurrentUser, currentUser }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [showQrModal, setShowQrModal] = useState(false);
-    const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
+    const [selectedEmployeeId] = useState(currentUser?.id ? String(currentUser.id) : "");
     const [orders, setOrders] = useState([]);
     const [lastUpdate, setLastUpdate] = useState(null);
     const [statusFilters, setStatusFilters] = useState([]);
-
-    useEffect(() => {
-        if (currentUser?.id) {
-            setSelectedEmployeeId(String(currentUser.id));
-        }
-    }, [currentUser]);
 
     useEffect(() => {
         if (!selectedEmployeeId) return;
