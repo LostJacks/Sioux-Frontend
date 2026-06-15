@@ -194,6 +194,24 @@
     min-width: 120px;
 }
 
+.notification-delete-button {
+    margin-top: 6px;
+    padding: 4px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+    .notification-delete-button:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fca5a5;
+    }
+
 .notification-date {
     font-size: 13px;
     font-weight: 600;

@@ -51,7 +51,7 @@ const formatTime = (value) => {
 };
 
 const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
-    const { notifications, refresh, markRead, userId } = useNotification();
+    const { notifications, refresh, markRead, deleteNotification, userId } = useNotification();
 
     const [scopeFilter, setScopeFilter] = useState(SCOPE_FILTERS.ALL);
     const [typeFilter, setTypeFilter] = useState(TYPE_FILTERS.ALL);
@@ -156,7 +156,7 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                         <h1>Notification history</h1>
                         <p className="notification-history-subtitle">
                             All notifications addressed to you, sorted from newest to oldest.
-                            Click an unread row to mark it as read.
+                            Click an unread row to mark it as read, or use the delete button to remove it.
                         </p>
                     </div>
 
@@ -267,6 +267,17 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                                             <div className="notification-date-group">
                                                 <span className="notification-date">{formatDate(n.createdAt)}</span>
                                                 <span className="notification-time">{formatTime(n.createdAt)}</span>
+                                                <button
+                                                    type="button"
+                                                    className="notification-delete-button"
+                                                    title="Delete notification"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        deleteNotification(n.id);
+                                                    }}
+                                                >
+                                                    ✕
+                                                </button>
                                             </div>
                                         </div>
 

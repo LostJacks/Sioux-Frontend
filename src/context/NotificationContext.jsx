@@ -10,7 +10,8 @@ import { NotificationContext } from "./NotificationContextStore";
 import {
     listForEmployee,
     listSince,
-    markAsRead as apiMarkAsRead
+    markAsRead as apiMarkAsRead,
+    deleteNotification as apiDeleteNotification
 } from "../services/NotificationApi";
 
 const DEFAULT_POLL_MS = 15000;
@@ -118,6 +119,15 @@ const NotificationProvider = ({
         );
     }, []);
 
+    const deleteNotification = useCallback(async (id) => {
+        try {
+            await apiDeleteNotification(id);
+        } catch (err) {
+            console.warn("[notifications] delete failed:", err.message);
+        }
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+    }, []);
+
     const unreadCount = useMemo(
         () => notifications.filter((n) => !n.read).length,
         [notifications]
@@ -130,9 +140,10 @@ const NotificationProvider = ({
             unreadCount,
             showNotification,
             refresh,
-            markRead
+            markRead,
+            deleteNotification
         }),
-        [userId, notifications, unreadCount, showNotification, refresh, markRead]
+        [userId, notifications, unreadCount, showNotification, refresh, markRead, deleteNotification]
     );
 
     return (

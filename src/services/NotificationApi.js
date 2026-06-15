@@ -52,6 +52,17 @@ export async function markAsRead(notificationId) {
     return await response.json();
 }
 
+export async function deleteNotification(notificationId) {
+    const response = await fetch(
+        `${API_BASE}/api/notifications/${notificationId}`,
+        { method: "DELETE" }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to delete notification (${response.status})`);
+    }
+}
+
 export async function notifyArrival(orderId, targetUserIds) {
     const body =
         Array.isArray(targetUserIds) && targetUserIds.length > 0
