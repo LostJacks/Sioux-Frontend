@@ -32,11 +32,6 @@ const ScanQrModal = ({ title = "Scan", onClose, onScan }) => {
                             "pdf417"
                         ]}
                     />
-                    <p className="qr-hint">
-                        {title.toLowerCase().includes("package")
-                            ? "Point camera at package barcode"
-                            : "Point camera at employee QR code"}
-                    </p>
                 </div>
             </div>
         </div>
