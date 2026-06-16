@@ -45,7 +45,7 @@ const App = () => {
 
     const setCurrentUser = (u) => setCurrentUserState(u);
 
-    const userId = currentUser?.id ?? 1;
+    const userId = currentUser?.id ?? null;
 
     return (
         <NotificationProvider userId={userId}>

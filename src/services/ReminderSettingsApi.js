@@ -15,3 +15,4 @@ export async function updateReminderSettings(settings) {
     if (!res.ok) throw new Error("Failed to save reminder settings");
     return res.json();
 }
+

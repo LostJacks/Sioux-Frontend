@@ -91,7 +91,7 @@ const ReminderSettings = () => {
                             <div className="reminder-input-unit">
                                 <input
                                     type="number"
-                                    min="1"
+                                    min="0"
                                     max="720"
                                     value={settings.initialDelayHours}
                                     disabled={!settings.enabled}

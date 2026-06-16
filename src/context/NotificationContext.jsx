@@ -40,6 +40,12 @@ const NotificationProvider = ({
     const lastSeenIdRef = useRef(0);
 
     useEffect(() => {
+        if (!userId) {
+            setNotifications([]);
+            setToast(null);
+            lastSeenIdRef.current = 0;
+            return;
+        }
         let cancelled = false;
         listForEmployee(userId)
             .then((list) => {
@@ -61,7 +67,7 @@ const NotificationProvider = ({
     }, [userId]);
 
     useEffect(() => {
-        if (!Number.isFinite(pollMs) || pollMs <= 0) return undefined;
+        if (!userId || !Number.isFinite(pollMs) || pollMs <= 0) return undefined;
         const interval = setInterval(async () => {
             try {
                 const fresh = await listSince(userId, lastSeenIdRef.current);
