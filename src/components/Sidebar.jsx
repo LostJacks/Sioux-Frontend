@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import siouxLogo from "../assets/sioux-logo.jpg";
 import { useNotification } from "../hooks/useNotification";
 
-const Sidebar = ({ currentRole, setCurrentUser }) => {
+const Sidebar = ({ currentRole, setCurrentUser, currentUser }) => {
     const { unreadCount } = useNotification() || {};
     const navigate = useNavigate();
 
@@ -80,9 +80,9 @@ const Sidebar = ({ currentRole, setCurrentUser }) => {
             <div className="sidebar-bottom">
                 <div className="current-role">
                     <p>Signed in as:</p>
-                    {currentRole === "manager"
-                        ? "Building Manager"
-                        : currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
+                    {currentUser
+                        ? `${currentUser.firstName ?? ""} ${currentUser.lastName ?? ""}`.trim() || currentUser.email
+                        : currentRole}
                 </div>
 
                 <button className="sign-out-button" onClick={handleSignOut}>

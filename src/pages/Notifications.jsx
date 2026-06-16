@@ -50,7 +50,7 @@ const formatTime = (value) => {
     }).format(date);
 };
 
-const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
+const Notifications = ({ currentRole, setCurrentRole, setCurrentUser, currentUser }) => {
     const { notifications, refresh, markRead, deleteNotification, userId } = useNotification();
 
     const [scopeFilter, setScopeFilter] = useState(SCOPE_FILTERS.ALL);
@@ -147,6 +147,7 @@ const Notifications = ({ currentRole, setCurrentRole, setCurrentUser }) => {
                 currentRole={currentRole}
                 setCurrentRole={setCurrentRole}
                 setCurrentUser={setCurrentUser}
+                currentUser={currentUser}
             />
 
             <main className="notification-history-page">

@@ -47,7 +47,7 @@ const mapOrder = (o) => {
     };
 };
 
-const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
+const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser, currentUser }) => {
     const [apiOrders, setApiOrders] = useState([]);
     const [displayOrders, setDisplayOrders] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -167,7 +167,7 @@ const Receptionist = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
+            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} currentUser={currentUser} />
 
             <main className="main-content">
                 <ReceptionistTopBar

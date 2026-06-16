@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 
 const API_BASE = "http://localhost:8080/api";
 
-const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
+const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser, currentUser }) => {
     const [name, setName] = useState("");
     const [address, setAddress] = useState("");
     const [floorNumber, setFloorNumber] = useState("1");
@@ -72,7 +72,7 @@ const AddBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
+            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} currentUser={currentUser} />
 
             <main className="manager-content">
 

@@ -52,7 +52,7 @@ function LoginPage({ setCurrentRole, setCurrentUser }) {
 
             setCurrentRole(role === "admin" ? "manager" : role);
             if (typeof setCurrentUser === "function") {
-                setCurrentUser({ id: found.id, email: found.email, role });
+                setCurrentUser({ id: found.id, email: found.email, role, firstName: found.firstName, lastName: found.lastName });
             }
             navigate(route);
         } catch (err) {

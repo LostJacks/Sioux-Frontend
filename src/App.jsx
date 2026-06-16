@@ -92,6 +92,7 @@ const App = () => {
                                 currentRole={currentRole}
                                 setCurrentRole={setCurrentRole}
                                 setCurrentUser={setCurrentUser}
+                                currentUser={currentUser}
                             />
                         </Protected>
                     }
@@ -105,6 +106,7 @@ const App = () => {
                                 currentRole={currentRole}
                                 setCurrentRole={setCurrentRole}
                                 setCurrentUser={setCurrentUser}
+                                currentUser={currentUser}
                             />
                         </Protected>
                     }
@@ -118,6 +120,7 @@ const App = () => {
                                 currentRole={currentRole}
                                 setCurrentRole={setCurrentRole}
                                 setCurrentUser={setCurrentUser}
+                                currentUser={currentUser}
                             />
                         </Protected>
                     }
@@ -131,6 +134,7 @@ const App = () => {
                                 currentRole={currentRole}
                                 setCurrentRole={setCurrentRole}
                                 setCurrentUser={setCurrentUser}
+                                currentUser={currentUser}
                             />
                         </Protected>
                     }
@@ -145,6 +149,7 @@ const App = () => {
                                     currentRole={currentRole}
                                     setCurrentRole={setCurrentRole}
                                     setCurrentUser={setCurrentUser}
+                                    currentUser={currentUser}
                                 />
                             ) : (
                                 <Navigate to="/employee" replace />

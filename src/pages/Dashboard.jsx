@@ -65,6 +65,7 @@ const Dashboard = ({ currentRole, setCurrentUser, currentUser }) => {
             <Sidebar
                 currentRole={currentRole}
                 setCurrentUser={setCurrentUser}
+                currentUser={currentUser}
             />
 
             <main className="main-content">

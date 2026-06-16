@@ -16,7 +16,7 @@ const mapApiBuilding = (b) => ({
     })),
 });
 
-const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
+const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser, currentUser }) => {
     const [buildingSearch] = useState("");
     const [buildings, setBuildings] = useState([]);
     const [selectedBuilding, setSelectedBuilding] = useState(null);
@@ -140,7 +140,7 @@ const UpdateBuilding = ({ currentRole, setCurrentRole, setCurrentUser }) => {
 
     return (
         <div className="dashboard">
-            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} />
+            <Sidebar currentRole={currentRole} setCurrentRole={setCurrentRole} setCurrentUser={setCurrentUser} currentUser={currentUser} />
 
             <main className="manager-content">
                 <div className="manager-top-row">
