@@ -47,6 +47,10 @@ const NotificationProvider = ({
                 const safe = Array.isArray(list) ? list : [];
                 setNotifications(safe);
                 lastSeenIdRef.current = maxIdIn(safe);
+                // Show toast for the newest unread notification on load
+                // so switching users surfaces pending notifications immediately.
+                const newestUnread = safe.find((n) => !n.read);
+                if (newestUnread) setToast(newestUnread);
             })
             .catch((err) => {
                 console.warn("[notifications] initial load failed:", err.message);
